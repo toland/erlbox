@@ -61,3 +61,8 @@ Rake::RDocTask.new do |rdoc|
 end
 
 task :default => :gem
+
+desc 'Build and install the gem'
+task :install => :gem do
+  sh "sudo gem install pkg/erlbox-#{ErlBox::VERSION.latest}.gem"
+end
