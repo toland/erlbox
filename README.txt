@@ -13,7 +13,10 @@ should be all that is necessary.
 
 == REQUIREMENTS
 
-You need the following gems to run the client.
+If you want to use the doc task and you are using Faxien, you must install the
+`edoc` and `syntax_tools` applications (`faxien ia <appname>`).
+
+You need the following gems to use the tasks.
 
 * rake >= 0.83 (seriously, when is rake gonna hit 1.0?)
 
