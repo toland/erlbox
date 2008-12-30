@@ -28,11 +28,12 @@ ERL_PATH = FileList["#{PWD}/../**/ebin"]
 APP_FILE = FileList["#{PWD}/ebin/*.app"][0]
 
 ERL_INCLUDE = "./include"
-ERLC_FLAGS = "-I#{INCLUDE} -pa #{EBIN.join(' -pa ')} +debug_info "
+ERLC_FLAGS = %W( -I#{ERL_INCLUDE} -pa #{ERL_PATH.join(' ')} -W )
+ERLC_FLAGS << '+debug_info' if ENV['ndebug'].nil?
 
-UNIT_TEST_FLAGS = ""
-INT_TEST_FLAGS  = ""
-PERF_TEST_FLAGS = ""
+UNIT_TEST_FLAGS = []
+INT_TEST_FLAGS  = []
+PERF_TEST_FLAGS = []
 
 TEST_ROOT = "tests"
 TEST_LOG_DIR = "#{TEST_ROOT}/logs"
@@ -42,13 +43,13 @@ INT_TEST_DIR  = "#{PWD}/#{TEST_ROOT}/int_test"
 PERF_TEST_DIR = "#{PWD}/#{TEST_ROOT}/perf_test"
 
 CLEAN.include %w( **/*.beam **/erl_crash.dump )
-CLOBBER.include [TEST_LOG_DIR, 'doc']
+CLOBBER.include TEST_LOG_DIR, 'doc'
 
 directory 'ebin'
 
 rule ".beam" => ["%{ebin,src}X.erl"] do |t|
   puts "compiling #{t.source}..."
-  sh "erlc -W #{ERLC_FLAGS} -o ebin #{t.source}", :verbose => false
+  sh "erlc #{print_flags(ERLC_FLAGS)} -o ebin #{t.source}", :verbose => false
 end
 
 desc "Compile Erlang sources to .beam files"
@@ -110,12 +111,12 @@ task :perf_test => 'test:perf'
 
 task :default => [:compile]
 
-def set_flags(flags, value)
-  flags.replace(value)
+def append_flags(flags, value)
+  flags << value
 end
 
-def append_flags(flags, value)
-  flags.insert(-1, value)
+def print_flags(flags)
+  flags.join(' ')
 end
 
 def erl_run(script, args = "") 
@@ -171,15 +172,15 @@ def do_validate_app(app_file)
 end
 
 def test_dir(type)
-  "#{TEST_ROOT}/#{type}_test"
+  "#{TEST_ROOT}/#{type.to_s}_test"
 end
 
 def compile_tests(type)
   # Is this necessary? I don't think so since CT compiles code itself.
   dir = test_dir(type)
   if File.directory?(dir)
-    compile_cmd = "erlc #{ERLC_FLAGS} -I#{erl_where('common_test')} \
-        -I#{erl_where('test_server')} -o #{dir} #{dir}/*.erl".squeeze(" ")
+    compile_cmd = "erlc #{print_flags(ERLC_FLAGS)} -I#{erl_where('common_test')}\
+                        -I#{erl_where('test_server')} -o #{dir} #{dir}/*.erl".squeeze(" ")
 
     sh compile_cmd, :verbose => false
   end  
@@ -188,7 +189,7 @@ end
 def check_and_run_tests(type, use_cover = false)
   dir = test_dir(type)
   if File.directory?(dir)
-    run_tests(dir, use_cover, eval("#{type.upcase}_TEST_FLAGS"))
+    run_tests(dir, use_cover, print_flags(eval("#{type.upcase}_TEST_FLAGS")))
   else
     puts "No #{type} tests defined. Skipping."
   end
