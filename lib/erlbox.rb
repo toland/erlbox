@@ -21,14 +21,13 @@ require 'erlbox/version'
 include ErlBox::Helpers
 
 PWD = Dir.getwd
-BASE_DIR = File.expand_path "#{PWD}/../"
 
-SRC = FileList['src/*.erl']
-OBJ = SRC.pathmap("%{src,ebin}X.beam")
-EBIN = FileList["#{BASE_DIR}/**/ebin"]
-APP = FileList["#{PWD}/ebin/*.app"][0]
+ERL_SRC = FileList['src/*.erl']
+ERL_BEAM = SRC.pathmap("%{src,ebin}X.beam")
+ERL_PATH = FileList["#{PWD}/../**/ebin"]
+APP_FILE = FileList["#{PWD}/ebin/*.app"][0]
 
-INCLUDE = "./include"
+ERL_INCLUDE = "./include"
 ERLC_FLAGS = "-I#{INCLUDE} -pa #{EBIN.join(' -pa ')} +debug_info "
 
 UNIT_TEST_FLAGS = ""
@@ -53,8 +52,8 @@ rule ".beam" => ["%{ebin,src}X.erl"] do |t|
 end
 
 desc "Compile Erlang sources to .beam files"
-task :compile => ['ebin'] + OBJ do
-  do_validate_app
+task :compile => ['ebin'] + ERL_BEAM do
+  do_validate_app(APP_FILE)
 end
 
 desc "Do a fresh build from scratch"
@@ -62,7 +61,7 @@ task :rebuild => [:clean, :compile]
 
 desc "Generate Edoc documentation"
 task :doc do
-  app = File.basename(APP, ".app")
+  app = File.basename(APP_FILE, ".app")
   sh %Q(erl -noshell -run edoc_run application #{app} '"."' "[]"  -s init stop)
 end
 
@@ -145,12 +144,12 @@ def erl_app_modules(app)
   end
 end
 
-def do_validate_app()
+def do_validate_app(app_file)
   # Setup app name and build sets of modules from the .app as well as
   # beams that got compiled
-  app = File.basename(APP, ".app")
+  app = File.basename(app_file, ".app")
   modules = Set.new(erl_app_modules(app))
-  beams = Set.new(OBJ.pathmap("%n").to_a)
+  beams = Set.new(ERL_BEAM.pathmap("%n").to_a)
 
   puts "validating #{app}.app..."
 
@@ -198,7 +197,7 @@ end
 def run_tests(dir, cover = false, rest = "")
   puts "running tests in #{dir}#{' with coverage' if cover}..."
 
-  output = `erl -pa #{EBIN.join(' ')} #{PWD}/include\
+  output = `erl -pa #{ERL_PATH.join(' ')} #{PWD}/include\
                 -noshell\
                 -s ct_run script_start\
                 -s erlang halt\
