@@ -70,6 +70,7 @@ namespace :test do
 
   desc "Test preparation run before all tests"
   task :prepare do
+    fail "No tests defined" unless File.directory?(TEST_ROOT)
     Dir.mkdir(TEST_LOG_DIR) unless File.directory?(TEST_LOG_DIR)
   end
 
