@@ -24,7 +24,7 @@ PWD = Dir.getwd
 
 ERL_SRC = FileList['src/*.erl']
 ERL_BEAM = ERL_SRC.pathmap("%{src,ebin}X.beam")
-ERL_PATH = FileList["#{PWD}/../**/ebin"]
+ERL_PATH = FileList.new
 APP_FILE = FileList["#{PWD}/ebin/*.app"][0]
 
 ERL_INCLUDE = "./include"
