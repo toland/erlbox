@@ -31,8 +31,19 @@ APP = FileList["#{PWD}/ebin/*.app"][0]
 INCLUDE = "./include"
 ERLC_FLAGS = "-I#{INCLUDE} -pa #{EBIN.join(' -pa ')} +debug_info "
 
+UNIT_TEST_FLAGS = ""
+INT_TEST_FLAGS  = ""
+PERF_TEST_FLAGS = ""
+
+TEST_ROOT = "tests"
+TEST_LOG_DIR = "#{TEST_ROOT}/logs"
+
+UNIT_TEST_DIR = "#{PWD}/#{TEST_ROOT}/unit_test"
+INT_TEST_DIR  = "#{PWD}/#{TEST_ROOT}/int_test"
+PERF_TEST_DIR = "#{PWD}/#{TEST_ROOT}/perf_test"
+
 CLEAN.include %w( **/*.beam **/erl_crash.dump )
-CLOBBER.include %w( int_test/logs test/logs doc )
+CLOBBER.include [TEST_LOG_DIR, 'doc']
 
 directory 'ebin'
 
@@ -49,22 +60,64 @@ end
 desc "Do a fresh build from scratch"
 task :rebuild => [:clean, :compile]
 
+desc "Generate Edoc documentation"
+task :doc do
+  app = File.basename(APP, ".app")
+  sh %Q(erl -noshell -run edoc_run application #{app} '"."' "[]"  -s init stop)
+end
+
+namespace :test do
+
+  desc "Test preparation run before all tests"
+  task :prepare do
+    Dir.mkdir(TEST_LOG_DIR) unless File.directory?(TEST_LOG_DIR)
+  end
+
+  task :results do
+    `open #{TEST_LOG_DIR}/index.html`
+  end
+
+  ['unit', 'int', 'perf'].each do |type|
+    desc "Run #{type} tests"
+    task type => "test:#{type}:prepare" do
+      check_and_run_tests(type, false)
+    end
+
+    namespace type do
+      desc "Prepare #{type} tests"
+      task :prepare => ['compile', '^prepare']
+
+      desc "Compile #{type} tests"
+      task :compile => 'rake:compile' do
+        compile_tests(type)
+      end
+
+      desc "Run #{type} tests with coverage"
+      task :cover => :prepare do
+        check_and_run_tests(type, true)
+      end
+    end
+  end
+
+  desc "Run all tests"
+  task :all => [:unit, :int, :perf]
+
+end
+
+# Convenience tasks for backward compatibility
+task :test => 'test:unit'
+task :int_test => 'test:int'
+task :perf_test => 'test:perf'
+
 task :default => [:compile]
 
-task :compile_tests do
-  do_compile_tests("test")
+def set_flags(flags, value)
+  flags.replace(value)
 end
 
-desc "Run unit tests"
-task :test => [:compile, :compile_tests]
-
-task :compile_int_tests do
-  do_compile_tests("int_test")
+def append_flags(flags, value)
+  flags.insert(-1, value)
 end
-
-desc "Run integration tests"
-task :int_test => [:compile, :compile_int_tests]
-
 
 def erl_run(script, args = "") 
   `erl -eval '#{script}' -s erlang halt #{args} -noshell 2>&1`.strip
@@ -118,28 +171,47 @@ def do_validate_app()
   end
 end
 
+def test_dir(type)
+  "#{TEST_ROOT}/#{type}_test"
+end
 
-def do_compile_tests(dir)
+def compile_tests(type)
+  # Is this necessary? I don't think so since CT compiles code itself.
+  dir = test_dir(type)
   if File.directory?(dir)
     compile_cmd = "erlc #{ERLC_FLAGS} -I#{erl_where('common_test')} \
         -I#{erl_where('test_server')} -o #{dir} #{dir}/*.erl".squeeze(" ")
 
     sh compile_cmd, :verbose => false
-
-    Dir.mkdir "#{dir}/logs" unless File.directory?("#{dir}/logs")
   end  
 end
 
-def run_tests(dir, rest = "")  
-  output = `erl -pa #{EBIN.join(' ')} #{PWD}/ebin #{PWD}/include \
-	            -noshell -s ct_run script_start -s erlang halt \
-                    #{get_cover(dir)} \
-	            #{get_suites(dir)} -logdir #{dir}/logs -env TEST_DIR #{PWD}/#{dir} \
-	            #{rest}`
+def check_and_run_tests(type, use_cover = false)
+  dir = test_dir(type)
+  if File.directory?(dir)
+    run_tests(dir, use_cover, eval("#{type.upcase}_TEST_FLAGS"))
+  else
+    puts "No #{type} tests defined. Skipping."
+  end
+end
+
+def run_tests(dir, cover = false, rest = "")
+  puts "running tests in #{dir}#{' with coverage' if cover}..."
+
+  output = `erl -pa #{EBIN.join(' ')} #{PWD}/include\
+                -noshell\
+                -s ct_run script_start\
+                -s erlang halt\
+                -name test@#{`hostname`.strip}\
+                #{cover_flags(dir, cover)}\
+                #{get_suites(dir)}\
+                -logdir #{TEST_LOG_DIR}\
+                -env TEST_DIR #{PWD}/#{dir}\
+                #{rest}`
 
   fail if $?.exitstatus != 0 && !ENV["stop_on_fail"].nil?
 
-  File.open("#{PWD}/#{dir}/logs/raw.log", "w") do |file|
+  File.open("#{PWD}/#{TEST_LOG_DIR}/raw.log", "w") do |file|
     file.write "--- Test run on #{Time.now.to_s} ---\n"
     file.write output
     file.write "\n\n"
@@ -152,13 +224,8 @@ def run_tests(dir, rest = "")
   end
 end
 
-def get_cover(dir)
-  use_cover = ENV["use_cover"]
-  if use_cover
-    "-cover #{dir}/cover.spec"
-  else
-    ""
-  end
+def cover_flags(dir, use_cover)
+  use_cover ? "-cover #{dir}/cover.spec" : ""
 end
 
 def get_suites(dir)
@@ -170,8 +237,4 @@ def get_suites(dir)
   else
     "-dir #{dir}"
   end
-end
-
-def run_edoc(app)
-  sh %Q(erl -noshell -run edoc_run application #{app.to_s} '"."' "[]"  -s init stop)
 end
