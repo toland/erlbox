@@ -28,7 +28,7 @@ ERL_PATH = FileList["#{PWD}/../**/ebin"]
 APP_FILE = FileList["#{PWD}/ebin/*.app"][0]
 
 ERL_INCLUDE = "./include"
-ERLC_FLAGS = %W( -I#{ERL_INCLUDE} -pa #{ERL_PATH.join(' ')} -W )
+ERLC_FLAGS = %W( -I#{ERL_INCLUDE} -W )
 ERLC_FLAGS << '+debug_info' if ENV['ndebug'].nil?
 
 UNIT_TEST_FLAGS = []
@@ -49,7 +49,7 @@ directory 'ebin'
 
 rule ".beam" => ["%{ebin,src}X.erl"] do |t|
   puts "compiling #{t.source}..."
-  sh "erlc #{print_flags(ERLC_FLAGS)} -o ebin #{t.source}", :verbose => false
+  sh "erlc #{print_flags(ERLC_FLAGS)} -pa #{ERL_PATH.join(' -pa ')} -o ebin #{t.source}", :verbose => false
 end
 
 desc "Compile Erlang sources to .beam files"
@@ -179,8 +179,9 @@ def compile_tests(type)
   # Is this necessary? I don't think so since CT compiles code itself.
   dir = test_dir(type)
   if File.directory?(dir)
-    compile_cmd = "erlc #{print_flags(ERLC_FLAGS)} -I#{erl_where('common_test')}\
-                        -I#{erl_where('test_server')} -o #{dir} #{dir}/*.erl".squeeze(" ")
+    compile_cmd = "erlc -I#{erl_where('common_test')} -I#{erl_where('test_server')}\
+                        #{print_flags(ERLC_FLAGS)} -pa #{ERL_PATH.join(' -pa ')}\
+                        -o #{dir} #{dir}/*.erl"
 
     sh compile_cmd, :verbose => false
   end  
