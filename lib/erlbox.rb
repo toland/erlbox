@@ -23,7 +23,7 @@ include ErlBox::Helpers
 PWD = Dir.getwd
 
 ERL_SRC = FileList['src/*.erl']
-ERL_BEAM = SRC.pathmap("%{src,ebin}X.beam")
+ERL_BEAM = ERL_SRC.pathmap("%{src,ebin}X.beam")
 ERL_PATH = FileList["#{PWD}/../**/ebin"]
 APP_FILE = FileList["#{PWD}/ebin/*.app"][0]
 
