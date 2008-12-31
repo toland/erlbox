@@ -16,6 +16,9 @@ require 'rake/clean'
 libdir = Pathname(__FILE__).dirname
 $:.unshift(libdir) unless $:.include?(libdir) || $:.include?(libdir.expand_path)
 
+## -------------------------------------------------------------------
+## Constants
+
 PWD = Dir.getwd
 
 ERL_SRC = FileList['src/*.erl']
@@ -41,12 +44,18 @@ PERF_TEST_DIR = "#{PWD}/#{TEST_ROOT}/perf_test"
 CLEAN.include %w( **/*.beam **/erl_crash.dump )
 CLOBBER.include TEST_LOG_DIR, 'doc'
 
+## -------------------------------------------------------------------
+## Rules
+
 directory 'ebin'
 
 rule ".beam" => ["%{ebin,src}X.erl"] do |t|
   puts "compiling #{t.source}..."
   sh "erlc #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)} -o ebin #{t.source}", :verbose => false
 end
+
+## -------------------------------------------------------------------
+## Tasks
 
 desc "Compile Erlang sources to .beam files"
 task :compile => ['ebin'] + ERL_BEAM do
@@ -120,12 +129,11 @@ end
 
 task :default => [:compile]
 
+## -------------------------------------------------------------------
+## Public functions
+
 def append_flags(flags, value)
   flags << value
-end
-
-def print_flags(flags)
-  flags.join(' ')
 end
 
 def erl_run(script, args = "") 
@@ -137,6 +145,23 @@ def erl_where(lib)
       io:format("~s\n", [filename:join(code:lib_dir(#{lib}), "include")])
       ERL
   erl_run(script)
+end
+
+def erl_app_version(app)
+  script = <<-ERL
+     ok = application:load(#{app}),
+     {ok, Vsn} = application:get_key(#{app}, vsn),
+     io:format("~s\\n", [Vsn]).
+     ERL
+  output = erl_run(script, "-pa ebin")
+  output.strip()
+end
+
+## -------------------------------------------------------------------
+## Private functions
+
+def print_flags(flags)
+  flags.join(' ')
 end
 
 def erl_app_modules(app)
@@ -178,16 +203,6 @@ def do_validate_app(app_file)
     missing_modules.each { |m| msg << "  * #{m}\n" }
     fail msg
   end
-end
-
-def erl_app_version(app)
-  script = <<-ERL
-     ok = application:load(#{app}),
-     {ok, Vsn} = application:get_key(#{app}, vsn),
-     io:format("~s\\n", [Vsn]).
-     ERL
-  output = erl_run(script, "-pa ebin")
-  output.strip()
 end
 
 def test_dir(type)
