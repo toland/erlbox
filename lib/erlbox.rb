@@ -16,9 +16,6 @@ require 'rake/clean'
 libdir = Pathname(__FILE__).dirname
 $:.unshift(libdir) unless $:.include?(libdir) || $:.include?(libdir.expand_path)
 
-require 'erlbox/helpers'
-include ErlBox::Helpers
-
 PWD = Dir.getwd
 
 ERL_SRC = FileList['src/*.erl']
