@@ -13,7 +13,7 @@ require 'rake/gempackagetask'
 require 'spec'
 require 'spec/rake/spectask'
 
-RDOC_TITLE = "Erlang Toolbox #{ErlBox::VERSION.latest} documentation"
+RDOC_TITLE = "Erlang Toolbox documentation"
 
 spec = Gem::Specification.new do |s|
   s.name         = 'erlbox'
@@ -32,13 +32,11 @@ spec = Gem::Specification.new do |s|
 
   # rdoc
   s.has_rdoc         = true
-  s.extra_rdoc_files = ['README.txt', 'History.txt']
+  s.extra_rdoc_files = ['README.txt']
   s.rdoc_options     = ['--quiet', 
                         '--title', RDOC_TITLE,
                         '--opname', 'index.html',
-                        '--line-numbers',
-                        '--main', 'README.txt',
-                        '--inline-source']
+                        '--main', 'README.txt']
 
   # Dependencies
   s.add_dependency 'rake', '>= 0.8.3'
@@ -52,10 +50,7 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'doc'
   rdoc.title = RDOC_TITLE
   rdoc.main = 'README.txt'
-  rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.rdoc_files.include('README.txt')
-  rdoc.rdoc_files.include('History.txt')
-  rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
 task :default => :gem

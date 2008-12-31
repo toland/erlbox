@@ -30,5 +30,11 @@ If you want to work with the client code, you will also need Rubygems version
 
   sudo gem install /path/to/erlbox-<version>.gem
 
+== HISTORY
+
+=== 1.0 12/29/2008
+
+* Initial release.
+
 
 Copyright (c) 2008 The Hive
