@@ -12,13 +12,12 @@ require 'rake/rdoctask'
 require 'rake/gempackagetask'
 require 'spec'
 require 'spec/rake/spectask'
-require Pathname('lib/erlbox/version')
 
 RDOC_TITLE = "Erlang Toolbox #{ErlBox::VERSION.latest} documentation"
 
 spec = Gem::Specification.new do |s|
   s.name         = 'erlbox'
-  s.version      = ErlBox::VERSION.latest
+  s.version      = '1.0'
   s.platform     = Gem::Platform::RUBY
   s.author       = 'Phillip Toland'
   s.email        = 'ptoland@thehive.com'
@@ -46,7 +45,6 @@ spec = Gem::Specification.new do |s|
 end
 
 Rake::GemPackageTask.new(spec) do |package|
-  `echo #{ErlBox::VERSION.git_revision} > .revision`
   package.gem_spec = spec
 end
 

@@ -17,7 +17,6 @@ libdir = Pathname(__FILE__).dirname
 $:.unshift(libdir) unless $:.include?(libdir) || $:.include?(libdir.expand_path)
 
 require 'erlbox/helpers'
-require 'erlbox/version'
 include ErlBox::Helpers
 
 PWD = Dir.getwd
