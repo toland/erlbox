@@ -49,7 +49,7 @@ directory 'ebin'
 
 rule ".beam" => ["%{ebin,src}X.erl"] do |t|
   puts "compiling #{t.source}..."
-  sh "erlc #{print_flags(ERLC_FLAGS)} -pa #{ERL_PATH.join(' -pa ')} -o ebin #{t.source}", :verbose => false
+  sh "erlc #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)} -o ebin #{t.source}", :verbose => false
 end
 
 desc "Compile Erlang sources to .beam files"
@@ -176,12 +176,18 @@ def test_dir(type)
   "#{TEST_ROOT}/#{type.to_s}_test"
 end
 
+def expand_path(path)
+  # erlc requires multiple -pa arguments and erl supports it
+  # so I am treating them the same here
+  path.empty? ? '' : "-pa #{path.join(' -pa ')}"
+end
+
 def compile_tests(type)
   # Is this necessary? I don't think so since CT compiles code itself.
   dir = test_dir(type)
   if File.directory?(dir)
     compile_cmd = "erlc -I#{erl_where('common_test')} -I#{erl_where('test_server')}\
-                        #{print_flags(ERLC_FLAGS)} -pa #{ERL_PATH.join(' -pa ')}\
+                        #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)}\
                         -o #{dir} #{dir}/*.erl"
 
     sh compile_cmd, :verbose => false
@@ -200,7 +206,7 @@ end
 def run_tests(dir, cover = false, rest = "")
   puts "running tests in #{dir}#{' with coverage' if cover}..."
 
-  output = `erl -pa #{ERL_PATH.join(' ')} #{PWD}/include\
+  output = `erl #{expand_path(ERL_PATH)} #{PWD}/include\
                 -noshell\
                 -s ct_run script_start\
                 -s erlang halt\
