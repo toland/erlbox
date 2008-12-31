@@ -110,6 +110,18 @@ task :test => 'test:unit'
 task :int_test => 'test:int'
 task :perf_test => 'test:perf'
 
+desc "Package app for publication to a faxien repo"
+task :package => [:compile] do
+  app = File.basename(APP_FILE, ".app")
+  vsn = erl_app_version(app)
+  target_dir = "#{app}-#{vsn}"
+  FileUtils.rm_rf target_dir
+  Dir.mkdir target_dir
+  FileUtils.cp_r 'ebin', target_dir, :verbose => false
+  FileUtils.cp_r 'src', target_dir, :verbose => false
+  puts "Packaged to #{target_dir}"
+end
+
 task :default => [:compile]
 
 def append_flags(flags, value)
@@ -170,6 +182,16 @@ def do_validate_app(app_file)
     missing_modules.each { |m| msg << "  * #{m}\n" }
     fail msg
   end
+end
+
+def erl_app_version(app)
+  script = <<-ERL
+     ok = application:load(#{app}),
+     {ok, Vsn} = application:get_key(#{app}, vsn),
+     io:format("~s\\n", [Vsn]).
+     ERL
+  output = erl_run(script, "-pa ebin")
+  output.strip()
 end
 
 def test_dir(type)
