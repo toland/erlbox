@@ -5,7 +5,7 @@
 ##
 ## -------------------------------------------------------------------
 
-MIB_SRCS = FileList["mibs/MAGKV-MIB.mib"]
+MIB_SRCS = FileList["mibs/*.mib"]
 MIB_BINS = MIB_SRCS.pathmap("%{mibs,priv/mibs}X.bin")
 
 directory 'priv/mibs'
