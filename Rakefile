@@ -11,10 +11,11 @@ require 'rake/rdoctask'
 require 'rake/gempackagetask'
 
 RDOC_TITLE = "Erlang Toolbox documentation"
+VERSION = '1.0'
 
 spec = Gem::Specification.new do |s|
   s.name         = 'erlbox'
-  s.version      = '1.0'
+  s.version      = VERSION
   s.platform     = Gem::Platform::RUBY
   s.author       = 'Phillip Toland'
   s.email        = 'ptoland@thehive.com'
@@ -53,5 +54,5 @@ task :default => :gem
 
 desc 'Build and install the gem'
 task :install => :gem do
-  sh "sudo gem install pkg/erlbox-#{ErlBox::VERSION.latest}.gem"
+  sh "sudo gem install pkg/erlbox-#{VERSION}.gem"
 end
