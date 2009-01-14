@@ -239,16 +239,20 @@ end
 def run_tests(dir, cover = false, rest = "")
   puts "running tests in #{dir}#{' with coverage' if cover}..."
 
-  output = `erl #{expand_path(ERL_PATH)} #{PWD}/include\
-                -noshell\
-                -s ct_run script_start\
-                -s erlang halt\
-                -name test@#{`hostname`.strip}\
-                #{cover_flags(dir, cover)}\
-                #{get_suites(dir)}\
-                -logdir #{TEST_LOG_DIR}\
-                -env TEST_DIR #{PWD}/#{dir}\
-                #{rest}`
+  cmd = "erl #{expand_path(ERL_PATH)} -pa #{PWD}/ebin #{PWD}/include\
+             -noshell\
+             -s ct_run script_start\
+             -s erlang halt\
+             -name test@#{`hostname`.strip}\
+             #{cover_flags(dir, cover)}\
+             #{get_suites(dir)}\
+             -logdir #{TEST_LOG_DIR}\
+             -env TEST_DIR #{dir}\
+             #{rest}"
+
+  puts cmd.squeeze(' ') unless ENV["verbose"].nil?
+
+  output = `#{cmd}`
 
   fail if $?.exitstatus != 0 && !ENV["stop_on_fail"].nil?
 
@@ -273,7 +277,7 @@ def get_suites(dir)
   suites = ENV['suites']
   if suites
     all_suites = ""
-    suites.each(' ') {|s| all_suites << "#{PWD}/#{dir}/#{s.strip}_SUITE "}
+    suites.each(' ') {|s| all_suites << "#{dir}/#{s.strip}_SUITE "}
     "-suite #{all_suites}"
   else
     "-dir #{dir}"
