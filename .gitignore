@@ -2,4 +2,4 @@ pkg
 tmp
 doc
 coverage
-.revision
+*.tmproj
