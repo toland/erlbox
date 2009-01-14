@@ -5,42 +5,41 @@
 ##
 ## -------------------------------------------------------------------
 
+require 'yaml'
 require 'rake'
 require 'rake/clean'
 require 'rake/rdoctask'
-require 'rake/gempackagetask'
 
 RDOC_TITLE = "Erlang Toolbox documentation"
-ERLBOX_VERSION = '1.1'
 
-spec = Gem::Specification.new do |s|
-  s.name         = 'erlbox'
-  s.version      = ERLBOX_VERSION
-  s.platform     = Gem::Platform::RUBY
-  s.author       = 'Phillip Toland'
-  s.email        = 'ptoland@thehive.com'
-  s.homepage     = 'http://thehive.com/'
-  s.summary      = 'Erlang Toolbox'
-  s.description  = 'Rake tasks and helper scripts for building Erlang applications.'
-  s.require_path = 'lib'
-  s.files        = ['README.txt', 'Rakefile'] + Dir['lib/**/*']
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |s|
+    s.name         = 'erlbox'
+    s.platform     = Gem::Platform::RUBY
+    s.author       = 'Phillip Toland'
+    s.email        = 'ptoland@thehive.com'
+    s.homepage     = 'http://thehive.com/'
+    s.summary      = 'Erlang Toolbox'
+    s.description  = 'Rake tasks and helper scripts for building Erlang applications.'
+    s.require_path = 'lib'
+    s.files        = ['README.txt', 'Rakefile'] + Dir['lib/**/*']
 
-  s.rubyforge_project = 'erlbox'
+    s.rubyforge_project = 'erlbox'
 
-  # rdoc
-  s.has_rdoc         = true
-  s.extra_rdoc_files = ['README.txt']
-  s.rdoc_options     = ['--quiet', 
-                        '--title', RDOC_TITLE,
-                        '--opname', 'index.html',
-                        '--main', 'README.txt']
+    # rdoc
+    s.has_rdoc         = true
+    s.extra_rdoc_files = ['README.txt']
+    s.rdoc_options     = ['--quiet', 
+                          '--title', RDOC_TITLE,
+                          '--opname', 'index.html',
+                          '--main', 'README.txt']
 
-  # Dependencies
-  s.add_dependency 'rake', '>= 0.8.3'
-end
-
-Rake::GemPackageTask.new(spec) do |package|
-  package.gem_spec = spec
+    # Dependencies
+    s.add_dependency 'rake', '>= 0.8.3'
+  end
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
 
 Rake::RDocTask.new do |rdoc|
