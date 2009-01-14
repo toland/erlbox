@@ -11,7 +11,7 @@ require 'rake/rdoctask'
 require 'rake/gempackagetask'
 
 RDOC_TITLE = "Erlang Toolbox documentation"
-ERLBOX_VERSION = '1.0'
+ERLBOX_VERSION = '1.1'
 
 spec = Gem::Specification.new do |s|
   s.name         = 'erlbox'
