@@ -34,10 +34,10 @@ UNIT_TEST_FLAGS = []
 INT_TEST_FLAGS  = []
 PERF_TEST_FLAGS = []
 
-TEST_ROOT = "tests"
+TEST_ROOT = "."
 TEST_LOG_DIR = "#{TEST_ROOT}/logs"
 
-UNIT_TEST_DIR = "#{PWD}/#{TEST_ROOT}/unit_test"
+UNIT_TEST_DIR = "#{PWD}/#{TEST_ROOT}/test"
 INT_TEST_DIR  = "#{PWD}/#{TEST_ROOT}/int_test"
 PERF_TEST_DIR = "#{PWD}/#{TEST_ROOT}/perf_test"
 
@@ -206,7 +206,7 @@ def do_validate_app(app_file)
 end
 
 def test_dir(type)
-  "#{TEST_ROOT}/#{type.to_s}_test"
+  eval("#{type.to_s.upcase}_TEST_DIR")
 end
 
 def expand_path(path)
