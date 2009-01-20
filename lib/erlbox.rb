@@ -239,6 +239,15 @@ end
 def run_tests(dir, cover = false, rest = "")
   puts "running tests in #{dir}#{' with coverage' if cover}..."
 
+  config_flags = ""
+  if File.exists?("#{dir}/test.config")
+    config_flags << "-ct_config #{dir}/test.config"
+  end
+
+  if File.exists?("#{dir}/app.config")
+    config_flags << " -config #{dir}/app.config"
+  end
+
   cmd = "erl #{expand_path(ERL_PATH)} -pa #{PWD}/ebin #{PWD}/include\
              -noshell\
              -s ct_run script_start\
@@ -248,7 +257,7 @@ def run_tests(dir, cover = false, rest = "")
              #{get_suites(dir)}\
              -logdir #{TEST_LOG_DIR}\
              -env TEST_DIR #{dir}\
-             #{rest}"
+             #{config_flags} #{rest}"
 
   puts cmd.squeeze(' ') unless ENV["verbose"].nil?
 
