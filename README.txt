@@ -14,14 +14,13 @@ not work correctly if you do not follow the prescribed structure (most likely no
       |-- Rakefile
       |-- ebin
       |-- include
+      |-- int_test
+      |-- logs
       |-- mibs
+      |-- perf_test
       |-- priv
       |-- src
-      `-- tests
-          |-- logs
-          |-- int_test
-          |-- perf_test
-          `-- unit_test
+      `-- unit_test
 
 If you are on the golden path then all you need to do is put "require 'erlbox'"
 at the top of an empty Rakefile. If you are on the golden path and have SNMP
