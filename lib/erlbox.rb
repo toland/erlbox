@@ -261,20 +261,24 @@ def run_tests(dir, cover = false, rest = "")
 
   puts cmd.squeeze(' ') unless ENV["verbose"].nil?
 
-  output = `#{cmd}`
+  unless defined? NOISY_TESTS
+    output = `#{cmd}`
 
-  fail if $?.exitstatus != 0 && !ENV["stop_on_fail"].nil?
+    fail if $?.exitstatus != 0 && !ENV["stop_on_fail"].nil?
 
-  File.open("#{PWD}/#{TEST_LOG_DIR}/raw.log", "w") do |file|
-    file.write "--- Test run on #{Time.now.to_s} ---\n"
-    file.write output
-    file.write "\n\n"
-  end
+    File.open("#{PWD}/#{TEST_LOG_DIR}/raw.log", "w") do |file|
+      file.write "--- Test run on #{Time.now.to_s} ---\n"
+      file.write output
+      file.write "\n\n"
+    end
 
-  if output[/, 0 failed/] && ENV["verbose"].nil?
-    puts "==> " + output[/TEST COMPLETE,.*test cases$/]
+    if output[/, 0 failed/] && ENV["verbose"].nil?
+      puts "==> " + output[/TEST COMPLETE,.*test cases$/]
+    else
+      puts output
+    end
   else
-    puts output
+    sh cmd
   end
 end
 
