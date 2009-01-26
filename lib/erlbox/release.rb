@@ -29,8 +29,8 @@ task :build_app do
 end
 
 task :prepare => REL_APPNAME do
-  sh "scripts/make-rel magd #{REL_VERSION} #{REL_APPS.join(' ')}"
-  sh "tar -xzf #{REL_FULLNAME}.tar.gz -C magd"
+  sh "scripts/make-rel #{REL_APPNAME} #{REL_VERSION} #{REL_APPS.join(' ')}"
+  sh "tar -xzf #{REL_FULLNAME}.tar.gz -C #{REL_APPNAME}"
   rm "#{REL_FULLNAME}.tar.gz"
 
   sh %Q(echo "#{ERTS_VSN} #{REL_VERSION}" > #{REL_APPNAME}/releases/start_erl.data)
