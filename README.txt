@@ -183,7 +183,17 @@ is required.
 
 == INSTALL
 
-  sudo gem install /path/to/erlbox-<version>.gem
+Assuming you have checked out the Erlbox sources to a directory called 'erlbox',
+all you need to do is:
+
+  rake install
+
+Be sure to enter your password when requested.
+
+If you have not installed the jeweler gem you will need to do so:
+
+  gem sources --add http://gems.github.com
+  sudo gem install technicalpickles-jeweler
 
 == HISTORY
 
