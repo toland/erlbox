@@ -259,9 +259,7 @@ def run_tests(dir, cover = false, rest = "")
              -env TEST_DIR #{dir}\
              #{config_flags} #{rest}"
 
-  puts cmd.squeeze(' ') unless ENV["verbose"].nil?
-
-  unless defined? NOISY_TESTS
+  if !defined?(NOISY_TESTS) && ENV["verbose"].nil?
     output = `#{cmd}`
 
     fail if $?.exitstatus != 0 && !ENV["stop_on_fail"].nil?
@@ -272,12 +270,13 @@ def run_tests(dir, cover = false, rest = "")
       file.write "\n\n"
     end
 
-    if output[/, 0 failed/] && ENV["verbose"].nil?
+    if output[/, 0 failed/]
       puts "==> " + output[/TEST COMPLETE,.*test cases$/]
     else
       puts output
     end
   else
+    puts cmd.squeeze(' ')
     sh cmd
   end
 end
