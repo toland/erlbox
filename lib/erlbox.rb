@@ -67,7 +67,7 @@ task :rebuild => [:clean, :compile]
 
 desc "Generate Edoc documentation"
 task :doc do
-  app = File.basename(APP_FILE, ".app")
+  app = erl_app_name(APP_FILE)
   sh %Q(erl -noshell -run edoc_run application #{app} '"."' "[]"  -s init stop)
 end
 
@@ -117,13 +117,13 @@ task :perf_test => 'test:perf'
 
 desc "Package app for publication to a faxien repo"
 task :package => [:compile] do
-  app = File.basename(APP_FILE, ".app")
-  vsn = erl_app_version(app)
-  target_dir = "#{app}-#{vsn}"
+  target_dir = package_dir
   FileUtils.rm_rf target_dir
   Dir.mkdir target_dir
   FileUtils.cp_r 'ebin', target_dir, :verbose => false
+  FileUtils.cp_r 'include', target_dir, :verbose => false
   FileUtils.cp_r 'src', target_dir, :verbose => false
+  FileUtils.cp_r 'priv', target_dir, :verbose => false
   puts "Packaged to #{target_dir}"
 end
 
@@ -136,7 +136,7 @@ def append_flags(flags, value)
   flags << value
 end
 
-def erl_run(script, args = "") 
+def erl_run(script, args = "")
   `erl -eval '#{script}' -s erlang halt #{args} -noshell 2>&1`.strip
 end
 
@@ -155,6 +155,16 @@ def erl_app_version(app)
      ERL
   output = erl_run(script, "-pa ebin")
   output.strip()
+end
+
+def erl_app_name(app_file)
+  File.basename(app_file, ".app")
+end
+
+def package_dir
+  app = erl_app_name(APP_FILE)
+  vsn = erl_app_version(app)
+  "#{app}-#{vsn}"
 end
 
 ## -------------------------------------------------------------------
@@ -182,7 +192,7 @@ end
 def do_validate_app(app_file)
   # Setup app name and build sets of modules from the .app as well as
   # beams that got compiled
-  app = File.basename(app_file, ".app")
+  app = erl_app_name(app_file)
   modules = Set.new(erl_app_modules(app))
   beams = Set.new(ERL_BEAM.pathmap("%n").to_a)
 
@@ -198,7 +208,7 @@ def do_validate_app(app_file)
 
   # Identify modules which are not listed in the .app, but are present in ebin/
   missing_modules = (beams - modules)
-  if not missing_modules.empty? 
+  if not missing_modules.empty?
     msg = "One or more .beam files exist that are not listed in #{app}.app:\n"
     missing_modules.each { |m| msg << "  * #{m}\n" }
     fail msg
@@ -224,7 +234,7 @@ def compile_tests(type)
                         -o #{dir} #{dir}/*.erl"
 
     sh compile_cmd, :verbose => false
-  end  
+  end
 end
 
 def check_and_run_tests(type, use_cover = false)
