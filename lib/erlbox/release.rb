@@ -37,8 +37,10 @@ task :prepare => REL_APPNAME do
   cp_r Dir.glob("overlays/#{REL_APPNAME}/*"), REL_APPNAME
 end
 
+desc "Stage the application into a directory"
 task :stage => [:clean, :build_app, :prepare]
 
+desc "Create a tarball from the staged application"
 task :release => :stage do
   mv REL_APPNAME, REL_FULLNAME
   sh "tar -cjf #{REL_FULLNAME}-#{RUBY_PLATFORM}.tar.bz2 #{REL_FULLNAME}"
