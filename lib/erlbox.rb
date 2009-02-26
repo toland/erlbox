@@ -28,7 +28,7 @@ APP_FILE = FileList["#{PWD}/ebin/*.app"][0]
 
 ERL_INCLUDE = "./include"
 ERLC_FLAGS = %W( -I#{ERL_INCLUDE} -W )
-ERLC_FLAGS << '+debug_info' if ENV['ndebug'].nil?
+ERLC_FLAGS << '+debug_info' if debug?
 
 UNIT_TEST_FLAGS = []
 INT_TEST_FLAGS  = []
@@ -165,6 +165,10 @@ def package_dir
   app = erl_app_name(APP_FILE)
   vsn = erl_app_version(app)
   "#{app}-#{vsn}"
+end
+
+def debug?
+  ENV['ndebug'].nil?
 end
 
 ## -------------------------------------------------------------------

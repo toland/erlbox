@@ -29,7 +29,7 @@ file DRIVER => [:compile_c] do
 end
 
 def dflag()
-  ENV["release"] ? "" : "-DDEBUG"
+  debug? ? "-DDEBUG" : ""
 end
 
 def erts_dir()
