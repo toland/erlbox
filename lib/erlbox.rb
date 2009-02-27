@@ -21,6 +21,10 @@ $:.unshift(libdir) unless $:.include?(libdir) || $:.include?(libdir.expand_path)
 
 PWD = Dir.getwd
 
+def debug?
+  ENV['ndebug'].nil?
+end
+
 ERL_SRC = FileList['src/*.erl']
 ERL_BEAM = ERL_SRC.pathmap("%{src,ebin}X.beam")
 ERL_PATH = FileList.new
@@ -167,9 +171,6 @@ def package_dir
   "#{app}-#{vsn}"
 end
 
-def debug?
-  ENV['ndebug'].nil?
-end
 
 ## -------------------------------------------------------------------
 ## Private functions
