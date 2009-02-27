@@ -127,7 +127,7 @@ task :package => [:compile] do
   FileUtils.cp_r 'ebin', target_dir, :verbose => false
   FileUtils.cp_r 'include', target_dir, :verbose => false
   FileUtils.cp_r 'src', target_dir, :verbose => false
-  FileUtils.cp_r 'priv', target_dir, :verbose => false
+  FileUtils.cp_r 'priv', target_dir, :verbose => false if File.exist?('priv')
   puts "Packaged to #{target_dir}"
 end
 
