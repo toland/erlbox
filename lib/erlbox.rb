@@ -22,8 +22,10 @@ $:.unshift(libdir) unless $:.include?(libdir) || $:.include?(libdir.expand_path)
 PWD = Dir.getwd
 
 def debug?
-  ENV['ndebug'].nil?
+  !ENV['debug'].nil?
 end
+
+puts "WARNING: Debugging is enabled." if debug?
 
 ERL_SRC = FileList['src/*.erl']
 ERL_BEAM = ERL_SRC.pathmap("%{src,ebin}X.beam")
