@@ -87,7 +87,7 @@ namespace :test do
     Dir.mkdir(TEST_LOG_DIR) unless File.directory?(TEST_LOG_DIR)
 
     # Always compile tests with debug info
-    puts "Debugging is enabled for test builds."A
+    puts "Debugging is enabled for test builds."
     ERLC_FLAGS << '+debug_info'
   end
 
