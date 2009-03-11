@@ -11,6 +11,8 @@ if !defined?(REL_APPNAME)
   fail "The variable REL_APPNAME must be defined"
 end
 
+verbose false
+
 CLEAN.include FileList["#{REL_APPNAME}*"]
 
 REL_APPS = %w( runtime_tools )
@@ -24,7 +26,7 @@ directory REL_APPNAME
 
 task :build_app do
   cd "../apps" do
-    sh "rake", :verbose => false
+    sh "rake"
   end
 end
 

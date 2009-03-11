@@ -20,12 +20,12 @@ task :compile_c => ['c_src'] + C_OBJS
 
 rule ".o" => ["%X.c", "%X.h"] do |t|
   puts "compiling #{t.source}..."
-  sh "gcc -g -c -Wall -Werror -fPIC #{dflag} -Ic_src/system/include -I#{erts_dir()}/include #{t.source} -o #{t.name}", :verbose => false
+  sh "gcc -g -c -Wall -Werror -fPIC #{dflag} -Ic_src/system/include -I#{erts_dir()}/include #{t.source} -o #{t.name}"
 end
 
 file DRIVER => [:compile_c] do
   puts "linking priv/#{DRIVER}..."
-  sh "gcc -g #{erts_link_cflags()} c_src/*.o c_src/system/lib/libdb-*.a -o #{DRIVER}", :verbose => false
+  sh "gcc -g #{erts_link_cflags()} c_src/*.o c_src/system/lib/libdb-*.a -o #{DRIVER}"
 end
 
 def dflag()

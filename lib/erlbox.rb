@@ -16,6 +16,8 @@ require 'rake/clean'
 libdir = Pathname(__FILE__).dirname
 $:.unshift(libdir) unless $:.include?(libdir) || $:.include?(libdir.expand_path)
 
+verbose false
+
 ## -------------------------------------------------------------------
 ## Constants
 
@@ -57,7 +59,7 @@ directory 'ebin'
 
 rule ".beam" => ["%{ebin,src}X.erl"] do |t|
   puts "compiling #{t.source}..."
-  sh "erlc #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)} -o ebin #{t.source}", :verbose => false
+  sh "erlc #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)} -o ebin #{t.source}"
 end
 
 ## -------------------------------------------------------------------
@@ -130,10 +132,10 @@ task :package => [:compile] do
   target_dir = package_dir
   FileUtils.rm_rf target_dir
   Dir.mkdir target_dir
-  FileUtils.cp_r 'ebin', target_dir, :verbose => false
-  FileUtils.cp_r 'include', target_dir, :verbose => false
-  FileUtils.cp_r 'src', target_dir, :verbose => false
-  FileUtils.cp_r 'priv', target_dir, :verbose => false if File.exist?('priv')
+  FileUtils.cp_r 'ebin', target_dir
+  FileUtils.cp_r 'include', target_dir
+  FileUtils.cp_r 'src', target_dir
+  FileUtils.cp_r 'priv', target_dir if File.exist?('priv')
   puts "Packaged to #{target_dir}"
 end
 
@@ -244,7 +246,7 @@ def compile_tests(type)
                         #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)}\
                         -o #{dir} #{dir}/*.erl"
 
-    sh compile_cmd, :verbose => false
+    sh compile_cmd
   end
 end
 

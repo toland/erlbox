@@ -5,12 +5,14 @@
 ##
 ## -------------------------------------------------------------------
 
+verbose false
+
 DIRS = FileList.new
 
 def recurse(task_name)
   DIRS.each do |dir|
     puts "===> Building #{dir}"
-    sh "(cd #{dir} && rake --silent #{task_name})", :verbose => false
+    sh "(cd #{dir} && rake --silent #{task_name})"
   end
 end
 

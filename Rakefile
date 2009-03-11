@@ -36,7 +36,7 @@ begin
                           '--main', 'README.txt']
 
     # Dependencies
-    s.add_dependency 'rake', '>= 0.8.3'
+    s.add_dependency 'rake', '>= 0.8.4'
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"

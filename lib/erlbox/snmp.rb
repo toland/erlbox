@@ -14,7 +14,7 @@ CLEAN.include %w( priv/mibs )
 
 rule ".bin" => ["%{priv/mibs,mibs}X.mib"] do |t|
   puts "compiling #{t.source}..."
-  sh "erlc -I priv/mibs -o priv/mibs #{t.source}", :verbose => false
+  sh "erlc -I priv/mibs -o priv/mibs #{t.source}"
 end
 
 desc "Compile SNMP mibs to .bin files"
