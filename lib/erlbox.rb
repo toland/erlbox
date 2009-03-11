@@ -83,6 +83,10 @@ namespace :test do
   task :prepare do
     fail "No tests defined" unless File.directory?(TEST_ROOT)
     Dir.mkdir(TEST_LOG_DIR) unless File.directory?(TEST_LOG_DIR)
+
+    # Always compile tests with debug info
+    puts "Debugging is enabled for test builds."A
+    ERLC_FLAGS << '+debug_info'
   end
 
   task :results do
@@ -97,7 +101,7 @@ namespace :test do
 
     namespace type do
       desc "Prepare #{type} tests"
-      task :prepare => ['compile', '^prepare']
+      task :prepare => ['^prepare', 'compile']
 
       desc "Compile #{type} tests"
       task :compile => 'rake:compile' do
