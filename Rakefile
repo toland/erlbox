@@ -49,4 +49,4 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README.txt')
 end
 
-task :default => :gem
+task :default => :build
