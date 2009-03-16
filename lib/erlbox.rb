@@ -133,8 +133,8 @@ task :package => [:compile] do
   FileUtils.rm_rf target_dir
   Dir.mkdir target_dir
   FileUtils.cp_r 'ebin', target_dir
-  FileUtils.cp_r 'include', target_dir
   FileUtils.cp_r 'src', target_dir
+  FileUtils.cp_r 'include', target_dir if File.exist?('include')
   FileUtils.cp_r 'priv', target_dir if File.exist?('priv')
   puts "Packaged to #{target_dir}"
 end
