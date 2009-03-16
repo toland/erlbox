@@ -196,7 +196,7 @@ def erl_app_modules(app)
 
   output = erl_run(script, "-pa ebin")
   if output[/badmatch/]
-    fail "Error processing .app file: ", output
+    puts "Error processing .app file: #{output}"
   else
     output.split("\n")
   end
