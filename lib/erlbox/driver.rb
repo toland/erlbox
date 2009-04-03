@@ -1,32 +1,45 @@
 ## -------------------------------------------------------------------
 ##
-## Erlang Toolbox: Tasks for building C extensions
+## Erlang Toolbox: Optional tasks for building C extensions
 ## Copyright (c) 2008 The Hive.  All rights reserved.
 ##
 ## -------------------------------------------------------------------
-require 'erlbox'
-require 'erlbox/utils'
+
+if !defined?(APP_NAME)
+  fail "You must require 'erlbox' before requiring this file"
+end
+
+## -------------------------------------------------------------------
+## Constants
 
 C_SRCS = FileList["c_src/*.c"]
 C_OBJS = C_SRCS.pathmap("%X.o")
-DRIVER = "priv/#{erl_app_name(APP_FILE)}_drv.so"
-
-directory 'c_src'
+DRIVER = "priv/#{APP_NAME}_drv.so"
 
 CLEAN.include %w( c_src/*.o priv/*.so  )
 
-task :compile => [DRIVER]
-task :compile_c => ['c_src'] + C_OBJS
+## -------------------------------------------------------------------
+## Rules
+
+directory 'c_src'
 
 rule ".o" => ["%X.c", "%X.h"] do |t|
   puts "compiling #{t.source}..."
   sh "gcc -g -c -Wall -Werror -fPIC #{dflag} -Ic_src/system/include -I#{erts_dir()}/include #{t.source} -o #{t.name}"
 end
 
-file DRIVER => [:compile_c] do
+file DRIVER => ['c_src'] + C_OBJS do
   puts "linking priv/#{DRIVER}..."
   sh "gcc -g #{erts_link_cflags()} c_src/*.o c_src/system/lib/libdb-*.a -o #{DRIVER}"
 end
+
+## -------------------------------------------------------------------
+## Tasks
+
+task :compile => [DRIVER]
+
+## -------------------------------------------------------------------
+## Helpers
 
 def dflag()
   debug? ? "-DDEBUG" : ""
@@ -46,4 +59,3 @@ def erts_link_cflags()
     " -fpic -shared"
   end
 end
-
