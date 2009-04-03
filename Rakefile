@@ -10,6 +10,8 @@ require 'rake'
 require 'rake/clean'
 require 'rake/rdoctask'
 
+CLEAN.include 'pkg'
+
 RDOC_TITLE = "Erlang Toolbox documentation"
 
 begin
