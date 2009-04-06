@@ -8,11 +8,8 @@
 require 'yaml'
 require 'rake'
 require 'rake/clean'
-require 'rake/rdoctask'
 
 CLEAN.include 'pkg'
-
-RDOC_TITLE = "Erlang Toolbox documentation"
 
 begin
   require 'jeweler'
@@ -21,34 +18,17 @@ begin
     s.platform     = Gem::Platform::RUBY
     s.author       = 'Phillip Toland'
     s.email        = 'ptoland@thehive.com'
-    s.homepage     = 'http://thehive.com/'
+    s.homepage     = 'http://projects.rascal/projects/erlbox'
     s.summary      = 'Erlang Toolbox'
     s.description  = 'Rake tasks and helper scripts for building Erlang applications.'
     s.require_path = 'lib'
-    s.files        = ['README.txt', 'Rakefile'] + Dir['lib/**/*']
-
-    s.rubyforge_project = 'erlbox'
-
-    # rdoc
-    s.has_rdoc         = true
-    s.extra_rdoc_files = ['README.txt']
-    s.rdoc_options     = ['--quiet', 
-                          '--title', RDOC_TITLE,
-                          '--opname', 'index.html',
-                          '--main', 'README.txt']
+    s.has_rdoc     = false
 
     # Dependencies
     s.add_dependency 'rake', '>= 0.8.4'
   end
 rescue LoadError
-  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
-end
-
-Rake::RDocTask.new do |rdoc|
-  rdoc.rdoc_dir = 'doc'
-  rdoc.title = RDOC_TITLE
-  rdoc.main = 'README.txt'
-  rdoc.rdoc_files.include('README.txt')
+  puts "Jeweler not available. Install it with: sudo gem install jeweler"
 end
 
 task :default => :build
