@@ -21,9 +21,9 @@ def erl_run(script, args = "")
   `erl -eval '#{script}' -s erlang halt #{args} -noshell 2>&1`.strip
 end
 
-def erl_where(lib)
+def erl_where(lib, dir = 'include')
   script = <<-ERL
-      io:format("~s\n", [filename:join(code:lib_dir(#{lib}), "include")])
+      io:format("~s\n", [filename:join(code:lib_dir(#{lib}), #{dir})])
       ERL
   erl_run(script)
 end
