@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.description = %q{Rake tasks and helper scripts for building Erlang applications.}
   s.email = %q{ptoland@thehive.com}
   s.extra_rdoc_files = ["README.txt"]
-  s.files = ["README.txt", "Rakefile", "lib/erlbox", "lib/erlbox/build.rb", "lib/erlbox/driver.rb", "lib/erlbox/edoc.rb", "lib/erlbox/faxien.rb", "lib/erlbox/recurse.rb", "lib/erlbox/release.rb", "lib/erlbox/snmp.rb", "lib/erlbox/test.rb", "lib/erlbox/utils.rb", "lib/erlbox.rb"]
+  s.files = ["README.txt", "Rakefile", "lib/erlbox", "lib/erlbox/build.rb", "lib/erlbox/dialyzer.rb", "lib/erlbox/driver.rb", "lib/erlbox/edoc.rb", "lib/erlbox/faxien.rb", "lib/erlbox/recurse.rb", "lib/erlbox/release.rb", "lib/erlbox/snmp.rb", "lib/erlbox/test.rb", "lib/erlbox/utils.rb", "lib/erlbox.rb"]
   s.has_rdoc = true
   s.homepage = %q{http://thehive.com/}
   s.rdoc_options = ["--quiet", "--title", "Erlang Toolbox documentation", "--opname", "index.html", "--main", "README.txt", "--inline-source", "--charset=UTF-8"]
