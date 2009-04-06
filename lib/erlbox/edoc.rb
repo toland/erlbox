@@ -22,4 +22,4 @@ namespace :edoc do
 
 end
 
-task :doc => 'edoc:run'
+task :edoc => 'edoc:run'
