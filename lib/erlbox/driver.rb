@@ -36,7 +36,10 @@ end
 ## -------------------------------------------------------------------
 ## Tasks
 
-task :compile => [DRIVER]
+desc "Compile and link the C port driver"
+task :driver => DRIVER
+
+task :compile => :driver
 
 ## -------------------------------------------------------------------
 ## Helpers

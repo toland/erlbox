@@ -31,4 +31,7 @@ end
 ## -------------------------------------------------------------------
 ## Tasks
 
-task :compile => [MIBS_DIR] + MIB_BINS
+desc "Compile SNMP MIBs"
+task :snmp => [MIBS_DIR] + MIB_BINS
+
+task :compile => :snmp
