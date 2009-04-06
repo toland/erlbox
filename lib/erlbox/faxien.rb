@@ -43,4 +43,4 @@ namespace :faxien do
 
 end
 
-task :package => 'faxien:package'
+task :faxien => ['faxien:package', 'faxien:publish']
