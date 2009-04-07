@@ -9,7 +9,7 @@
 ## Constants
 
 PLT_LIBS = %w( kernel stdlib )
-PLT_FILE = "~/.dialyzer_plt"
+PLT_FILE = "#{ENV['HOME']}/.dialyzer_plt"
 
 CLEAN.include 'dialyzer.log'
 
