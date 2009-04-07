@@ -13,6 +13,16 @@ CLEAN.include 'pkg'
 
 begin
   require 'jeweler'
+
+  module Git
+    class Lib
+      def tag(tag)
+        # Force an annotated tag
+        command('tag', [tag, '-a', '-m', tag])
+      end
+    end
+  end
+
   Jeweler::Tasks.new do |s|
     s.name         = 'erlbox'
     s.platform     = Gem::Platform::RUBY
