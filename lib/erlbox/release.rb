@@ -30,8 +30,12 @@ task :build_app do
   end
 end
 
-task :prepare => REL_APPNAME do
+desc "Run the make-rel script"
+task :make_rel do
   sh "scripts/make-rel #{REL_APPNAME} #{REL_VERSION} #{REL_APPS.join(' ')}"
+end
+
+task :prepare => [REL_APPNAME, :make_rel] do
   sh "tar -xzf #{REL_FULLNAME}.tar.gz -C #{REL_APPNAME}"
   rm "#{REL_FULLNAME}.tar.gz"
 
