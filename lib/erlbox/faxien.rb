@@ -38,7 +38,7 @@ namespace :faxien do
 
   desc "Publish a packaged application to a faxien repo"
   task :publish do
-    `faxien publish #{PACKAGE_DIR}`
+    sh "faxien publish #{PACKAGE_DIR}"
   end
 
 end
