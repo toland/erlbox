@@ -10,38 +10,6 @@ if !defined?(APP_NAME)
 end
 
 ## -------------------------------------------------------------------
-## Constants
-
-C_SRCS = FileList["c_src/*.c"]
-C_OBJS = C_SRCS.pathmap("%X.o")
-DRIVER = "priv/#{APP_NAME}_drv.so"
-
-CLEAN.include %w( c_src/*.o priv/*.so  )
-
-## -------------------------------------------------------------------
-## Rules
-
-directory 'c_src'
-
-rule ".o" => ["%X.c", "%X.h"] do |t|
-  puts "compiling #{t.source}..."
-  sh "gcc -g -c -Wall -Werror -fPIC #{dflag} -Ic_src/system/include -I#{erts_dir()}/include #{t.source} -o #{t.name}"
-end
-
-file DRIVER => ['c_src'] + C_OBJS do
-  puts "linking priv/#{DRIVER}..."
-  sh "gcc -g #{erts_link_cflags()} c_src/*.o c_src/system/lib/libdb-*.a -o #{DRIVER}"
-end
-
-## -------------------------------------------------------------------
-## Tasks
-
-desc "Compile and link the C port driver"
-task :driver => DRIVER
-
-task :compile => :driver
-
-## -------------------------------------------------------------------
 ## Helpers
 
 def dflag()
@@ -57,8 +25,42 @@ end
 
 def erts_link_cflags()
   if darwin?
-    " -fPIC -bundle -flat_namespace -undefined suppress "
+    %w(-fPIC -bundle -flat_namespace -undefined suppress)
   else
-    " -fpic -shared"
+    %w(-fpic -shared)
   end
 end
+
+## -------------------------------------------------------------------
+## Constants
+
+C_SRCS = FileList["c_src/*.c"]
+C_OBJS = C_SRCS.pathmap("%X.o")
+CC_FLAGS = %W(-g -c -Wall -Werror -fPIC #{dflag()} -I#{erts_dir()}/include)
+LD_FLAGS = erts_link_cflags()
+DRIVER = "priv/#{APP_NAME}_drv.so"
+
+CLEAN.include %w( c_src/*.o priv/*.so  )
+
+## -------------------------------------------------------------------
+## Rules
+
+directory 'c_src'
+
+rule ".o" => ["%X.c", "%X.h"] do |t|
+  puts "compiling #{t.source}..."
+  sh "gcc #{print_flags(CC_FLAGS)} #{t.source} -o #{t.name}"
+end
+
+file DRIVER => ['c_src'] + C_OBJS do
+  puts "linking priv/#{DRIVER}..."
+  sh "gcc -g #{print_flags(LD_FLAGS)} c_src/*.o -o #{DRIVER}"
+end
+
+## -------------------------------------------------------------------
+## Tasks
+
+desc "Compile and link the C port driver"
+task :driver => DRIVER
+
+task :compile => :driver
