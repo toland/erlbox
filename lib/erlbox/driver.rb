@@ -34,27 +34,32 @@ end
 ## -------------------------------------------------------------------
 ## Constants
 
-C_SRCS = FileList["c_src/*.c"]
-C_OBJS = C_SRCS.pathmap("%X.o")
+SRC_DIR = 'c_src'
+C_SRCS  = FileList["#{SRC_DIR}/*.c"]
+C_OBJS  = C_SRCS.pathmap("%X.o")
+
+DRV_DIR = 'priv'
+DRIVER  = "#{DRV_DIR}/#{APP_NAME}_drv.so"
+
 CC_FLAGS = %W(-g -c -Wall -Werror -fPIC #{dflag()} -I#{erts_dir()}/include)
 LD_FLAGS = erts_link_cflags()
-DRIVER = "priv/#{APP_NAME}_drv.so"
 
-CLEAN.include %w( c_src/*.o priv/*.so  )
+CLEAN.include %W( #{SRC_DIR}/*.o #{DRV_DIR}/*.so  )
 
 ## -------------------------------------------------------------------
 ## Rules
 
-directory 'c_src'
+directory SRC_DIR
+directory DRV_DIR
 
 rule ".o" => ["%X.c", "%X.h"] do |t|
   puts "compiling #{t.source}..."
   sh "gcc #{print_flags(CC_FLAGS)} #{t.source} -o #{t.name}"
 end
 
-file DRIVER => ['c_src'] + C_OBJS do
-  puts "linking priv/#{DRIVER}..."
-  sh "gcc -g #{print_flags(LD_FLAGS)} c_src/*.o -o #{DRIVER}"
+file DRIVER => [SRC_DIR, DRV_DIR] + C_OBJS do
+  puts "linking #{DRIVER}..."
+  sh "gcc -g #{print_flags(LD_FLAGS)} #{SRC_DIR}/*.o -o #{DRIVER}"
 end
 
 ## -------------------------------------------------------------------
