@@ -43,6 +43,7 @@ DRIVER  = "#{DRV_DIR}/#{APP_NAME}_drv.so"
 
 CC_FLAGS = %W(-g -c -Wall -Werror -fPIC #{dflag()} -I#{erts_dir()}/include)
 LD_FLAGS = erts_link_cflags()
+LD_LIBS  = []
 
 CLEAN.include %W( #{SRC_DIR}/*.o #{DRV_DIR}/*.so  )
 
@@ -59,7 +60,7 @@ end
 
 file DRIVER => [SRC_DIR, DRV_DIR] + C_OBJS do
   puts "linking #{DRIVER}..."
-  sh "gcc -g #{print_flags(LD_FLAGS)} #{SRC_DIR}/*.o -o #{DRIVER}"
+  sh "gcc -g #{print_flags(LD_FLAGS)} #{SRC_DIR}/*.o #{print_flags(LD_LIBS)} -o #{DRIVER}"
 end
 
 ## -------------------------------------------------------------------
