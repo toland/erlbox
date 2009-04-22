@@ -133,7 +133,7 @@ def run_tests(dir, cover = false, rest = "")
              -env TEST_DIR #{dir}\
              #{config_flags} #{rest}"
 
-  if !defined?(NOISY_TESTS) && ENV["verbose"].nil?
+  if !defined?(NOISY_TESTS) && !verbose?
     output = `#{cmd}`
 
     fail if $?.exitstatus != 0 && !ENV["stop_on_fail"].nil?

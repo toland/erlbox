@@ -55,12 +55,12 @@ directory DRV_DIR
 
 rule ".o" => ["%X.c", "%X.h"] do |t|
   puts "compiling #{t.source}..."
-  sh "gcc #{print_flags(CC_FLAGS)} #{t.source} -o #{t.name}"
+  sh "gcc #{print_flags(CC_FLAGS)} #{t.source} -o #{t.name}", :verbose => verbose?
 end
 
 file DRIVER => [SRC_DIR, DRV_DIR] + C_OBJS do
   puts "linking #{DRIVER}..."
-  sh "gcc -g #{print_flags(LD_FLAGS)} #{SRC_DIR}/*.o #{print_flags(LD_LIBS)} -o #{DRIVER}"
+  sh "gcc -g #{print_flags(LD_FLAGS)} #{SRC_DIR}/*.o #{print_flags(LD_LIBS)} -o #{DRIVER}", :verbose => verbose?
 end
 
 ## -------------------------------------------------------------------

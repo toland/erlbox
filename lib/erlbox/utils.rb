@@ -9,6 +9,10 @@ def debug?
   !ENV['debug'].nil?
 end
 
+def verbose?
+  !ENV['verbose'].nil?
+end
+
 def print_flags(flags)
   flags.join(' ')
 end
