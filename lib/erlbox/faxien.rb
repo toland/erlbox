@@ -33,6 +33,7 @@ namespace :faxien do
     FileUtils.cp_r 'src', PACKAGE_DIR
     FileUtils.cp_r 'include', PACKAGE_DIR if File.exist?('include')
     FileUtils.cp_r 'priv', PACKAGE_DIR if File.exist?('priv')
+    FileUtils.cp_r 'mibs', PACKAGE_DIR if File.exist?('mibs')
     puts "Packaged to #{PACKAGE_DIR}"
   end
 
