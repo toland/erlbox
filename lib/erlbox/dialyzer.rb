@@ -4,6 +4,7 @@
 ## Copyright (c) 2008 The Hive.  All rights reserved.
 ##
 ## -------------------------------------------------------------------
+require 'pathname'
 
 ## -------------------------------------------------------------------
 ## Constants
@@ -33,9 +34,10 @@ namespace :dialyzer do
       `dialyzer --add_to_plt -r #{erl_where(lib, 'ebin')} --plt #{PLT_FILE}`
     end
 
-    ERL_PATH.each do |app|
-      puts "adding #{app} to plt..."
-      `dialyzer --add_to_plt -r #{app} --plt #{PLT_FILE}`
+    ERL_PATH.each do |app_path|
+      path = Pathname.new(app_path).realpath.to_s
+      puts "adding #{path} to plt..."
+      `dialyzer --add_to_plt -r #{path} --plt #{PLT_FILE}`
     end
   end
 
