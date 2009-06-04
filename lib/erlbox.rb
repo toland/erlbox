@@ -18,6 +18,7 @@ verbose false
 require 'erlbox/utils'
 require 'erlbox/build'
 require 'erlbox/test'
+require 'erlbox/eunit'
 require 'erlbox/edoc'
 require 'erlbox/faxien'
 require 'erlbox/dialyzer'

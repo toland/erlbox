@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
     "lib/erlbox/dialyzer.rb",
     "lib/erlbox/driver.rb",
     "lib/erlbox/edoc.rb",
+    "lib/erlbox/eunit.rb",
     "lib/erlbox/faxien.rb",
     "lib/erlbox/recurse.rb",
     "lib/erlbox/release.rb",
