@@ -55,9 +55,7 @@ namespace :test do
       task :prepare => ['^prepare', 'compile']
 
       desc "Compile #{type} tests"
-      task :compile => 'rake:compile' do
-        compile_tests(type)
-      end
+      task :compile => 'rake:compile'
 
       desc "Run #{type} tests with coverage"
       task :cover => :prepare do
@@ -82,19 +80,6 @@ def test_dir(type)
   eval("#{type.to_s.upcase}_TEST_DIR")
 end
 
-def compile_tests(type)
-  # Is this necessary? I don't think so since CT compiles code itself.
-  # TODO Either need to get rid of this or turn it into an actual task
-  dir = test_dir(type)
-  if File.directory?(dir)
-    compile_cmd = "erlc -I#{erl_where('common_test')} -I#{erl_where('test_server')}\
-                        #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)}\
-                        -o #{dir} #{dir}/*.erl"
-
-    sh compile_cmd
-  end
-end
-
 def check_and_run_tests(type, use_cover = false)
   dir = test_dir(type)
   if File.directory?(dir)
@@ -116,7 +101,7 @@ def run_tests(dir, cover = false, rest = "")
     config_flags << " -config #{dir}/app.config"
   end
 
-  cmd = "erl #{expand_path(ERL_PATH)} -pa #{PWD}/ebin #{PWD}/include\
+  cmd = "erl #{expand_path(ERL_PATH)} -pa #{PWD}/ebin -I#{PWD}/include\
              -noshell\
              -s ct_run script_start\
              -s erlang halt\
