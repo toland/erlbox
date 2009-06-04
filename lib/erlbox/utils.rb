@@ -21,6 +21,12 @@ def append_flags(flags, value)
   flags << value
 end
 
+def expand_path(path)
+  # erlc requires multiple -pa arguments and erl supports it
+  # so I am treating them the same here
+  path.empty? ? '' : "-pa #{path.join(' -pa ')}"
+end
+
 def erl_run(script, args = "")
   `erl -eval '#{script}' -s erlang halt #{args} -noshell 2>&1`.strip
 end

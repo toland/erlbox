@@ -82,12 +82,6 @@ def test_dir(type)
   eval("#{type.to_s.upcase}_TEST_DIR")
 end
 
-def expand_path(path)
-  # erlc requires multiple -pa arguments and erl supports it
-  # so I am treating them the same here
-  path.empty? ? '' : "-pa #{path.join(' -pa ')}"
-end
-
 def compile_tests(type)
   # Is this necessary? I don't think so since CT compiles code itself.
   # TODO Either need to get rid of this or turn it into an actual task
