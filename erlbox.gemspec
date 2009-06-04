@@ -2,32 +2,34 @@
 
 Gem::Specification.new do |s|
   s.name = %q{erlbox}
-  s.version = "1.4.6"
+  s.version = "1.4.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Phillip Toland"]
-  s.date = %q{2009-05-04}
+  s.date = %q{2009-06-04}
   s.description = %q{Rake tasks and helper scripts for building Erlang applications.}
   s.email = %q{ptoland@thehive.com}
   s.extra_rdoc_files = [
     "README.txt"
   ]
   s.files = [
-    "README.txt",
-    "Rakefile",
-    "VERSION.yml",
-    "lib/erlbox.rb",
-    "lib/erlbox/build.rb",
-    "lib/erlbox/dialyzer.rb",
-    "lib/erlbox/driver.rb",
-    "lib/erlbox/edoc.rb",
-    "lib/erlbox/eunit.rb",
-    "lib/erlbox/faxien.rb",
-    "lib/erlbox/recurse.rb",
-    "lib/erlbox/release.rb",
-    "lib/erlbox/snmp.rb",
-    "lib/erlbox/test.rb",
-    "lib/erlbox/utils.rb"
+    ".gitignore",
+     "README.txt",
+     "Rakefile",
+     "VERSION.yml",
+     "erlbox.gemspec",
+     "lib/erlbox.rb",
+     "lib/erlbox/build.rb",
+     "lib/erlbox/dialyzer.rb",
+     "lib/erlbox/driver.rb",
+     "lib/erlbox/edoc.rb",
+     "lib/erlbox/eunit.rb",
+     "lib/erlbox/faxien.rb",
+     "lib/erlbox/recurse.rb",
+     "lib/erlbox/release.rb",
+     "lib/erlbox/snmp.rb",
+     "lib/erlbox/test.rb",
+     "lib/erlbox/utils.rb"
   ]
   s.homepage = %q{http://projects.rascal/projects/erlbox}
   s.rdoc_options = ["--charset=UTF-8"]
