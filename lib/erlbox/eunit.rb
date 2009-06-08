@@ -11,6 +11,8 @@
 EUNIT_SRC = FileList['test/*_tests.erl']
 EUNIT_BEAM = EUNIT_SRC.pathmap('%X.beam')
 
+CLOBBER.include 'coverage'
+
 ## -------------------------------------------------------------------
 ## Tasks
 
@@ -34,7 +36,7 @@ namespace :eunit do
 
   desc 'Run eunit tests'
   task :test => :prepare do
-    run_eunit('test')
+    run_eunit('test', ENV['cover'])
   end
 
 end
