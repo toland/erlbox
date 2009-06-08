@@ -34,6 +34,8 @@ begin
     s.require_path = 'lib'
     s.has_rdoc     = false
 
+    s.files.include 'lib/erlbox/eunit'
+
     # Dependencies
     s.add_dependency 'rake', '>= 0.8.4'
   end

@@ -1,0 +1,116 @@
+#!/usr/bin/env escript
+
+
+main(Args) ->
+    Opts = parse_args(Args, dict:new()),
+    Files = find_test_files(Opts),
+    maybe_cover_compile(Opts),
+    eunit:test(test_names(Files), test_flags(Opts)),
+    maybe_analyze_cover(Opts).
+
+
+parse_args([], Opts) ->
+    Opts;
+parse_args(["-v"|Rest], Opts) ->
+    parse_args(Rest, dict:store(verbose, true, Opts));
+parse_args(["-cover"|Rest], Opts) ->
+    parse_args(Rest, dict:store(cover, true, Opts));
+parse_args(["-o", Dir|Rest], Opts) ->
+    parse_args(Rest, dict:store(cover_dir, Dir, Opts));
+parse_args(["-b", Path|Rest], Opts) ->
+    true = code:add_path(Path),
+    parse_args(Rest, dict:store(bin_dir, Path, Opts));
+parse_args(["-s", SuiteName|Rest], Opts) ->
+    Suite = list_to_atom(SuiteName),
+    F = fun(Suites) -> [Suite|Suites] end,
+    parse_args(Rest, dict:update(suites, F, [Suite], Opts));
+parse_args([Dir|Rest], Opts) ->
+    true = code:add_path(Dir),
+    parse_args(Rest, dict:store(test_dir, Dir, Opts)).
+
+find_test_files(Opts) ->
+    case dict:find(suites, Opts) of
+        error ->
+            case dict:find(test_dir, Opts) of
+                error ->
+                    io:fwrite("Error! Must provide test directory or suite names."),
+                    [];
+
+                {ok, Dir} ->
+                    case file:list_dir(Dir) of
+                        {ok, Files} ->
+                            F = fun(File, Acc0) ->
+                                    case lists:suffix("_tests.erl", File) of
+                                        true  -> [File|Acc0];
+                                        false -> Acc0
+                                    end
+                                end,
+
+                            lists:foldl(F, [], Files);
+
+                        _ ->
+                            []
+                    end
+            end;
+
+        {ok, Suites} ->
+            Suites
+    end.
+
+test_names(Files) ->
+    [list_to_atom(filename:basename(F, ".erl")) || F <- Files].
+
+test_flags(Opts) ->
+    case dict:find(verbose, Opts) of
+        {ok, true}  -> [verbose];
+        {ok, false} -> [];
+        error       -> []
+    end.
+
+cover_enabled(Opts) ->
+    case dict:find(cover, Opts) of
+        {ok, true}  -> true;
+        {ok, false} -> false;
+        error       -> false
+    end.
+
+maybe_cover_compile(Opts) ->
+    case cover_enabled(Opts) of
+        true ->
+            case dict:find(bin_dir, Opts) of
+                error        -> BinDir = "./ebin";
+                {ok, BinDir} -> BinDir
+            end,
+            io:fwrite("Cover compiling modules in ~s~n", [BinDir]),
+            cover:compile_beam_directory(BinDir);
+
+        false ->
+            ok
+    end.
+
+maybe_analyze_cover(Opts) ->
+    case cover_enabled(Opts) of
+        true ->
+            io:fwrite("Generating coverage report...~n"),
+            case dict:find(cover_dir, Opts) of
+                error          -> CoverDir = "./coverage";
+                {ok, CoverDir} -> CoverDir
+            end,
+            ok = filelib:ensure_dir(filename:join(CoverDir, ".dummy")),
+    		cover:export(filename:join(CoverDir, "all.coverdata")),
+
+            Modules = lists:reverse(cover:modules()),
+            F = fun(Mod) ->
+                    {ok, {_, {Cov, NotCov}}} = cover:analyse(Mod, module),
+                    Pct = (Cov / (Cov + NotCov)) * 100,
+                    io:fwrite("~5B ~5B ~5.1f% ~p~n", [Cov, NotCov, Pct, Mod]),
+
+                    OutFile = filename:join([CoverDir,
+                        atom_to_list(Mod) ++ ".COVER.html"]),
+                    cover:analyse_to_file(Mod, OutFile, [html])
+                end,
+            lists:map(F, Modules);
+
+        false ->
+            ok
+    end.
