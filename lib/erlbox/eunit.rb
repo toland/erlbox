@@ -24,18 +24,18 @@ end
 
 namespace :eunit do
 
-  desc 'Compile eunit test sources'
-  task :compile => ['build:compile'] + EUNIT_BEAM
-
   desc 'Eunit test preparation'
-  task :prepare => :compile do
+  task :prepare do
     # Always compile tests with debug info
     puts 'Debugging is enabled for test builds.'
     ERLC_FLAGS << '+debug_info'
   end
 
+  desc 'Compile eunit test sources'
+  task :compile => ['prepare', 'build:compile'] + EUNIT_BEAM
+
   desc 'Run eunit tests'
-  task :test => :prepare do
+  task :test => :compile do
     run_eunit('test', ENV['cover'])
   end
 
