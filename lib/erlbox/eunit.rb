@@ -48,7 +48,7 @@ task :eunit => 'eunit:test'
 def run_eunit(dir, cover = false, rest = '')
   puts "running tests in #{dir}#{' with coverage' if cover}..."
 
-  cover_flags = cover ? '-cover' : ''
+  cover_flags = cover ? "-cover -o #{TEST_LOG_DIR}/coverage" : ''
 
   suites = ENV['suites']
   all_suites = ''
