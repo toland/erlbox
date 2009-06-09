@@ -21,6 +21,10 @@ def append_flags(flags, value)
   flags << value
 end
 
+def abspath(path)
+  Pathname.new(path).realpath.to_s
+end
+
 def expand_path(path)
   # erlc requires multiple -pa arguments and erl supports it
   # so I am treating them the same here

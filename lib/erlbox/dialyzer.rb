@@ -35,7 +35,7 @@ namespace :dialyzer do
     end
 
     ERL_PATH.each do |app_path|
-      path = Pathname.new(app_path).realpath.to_s
+      path = abspath(app_path)
       puts "adding #{path} to plt..."
       `dialyzer --add_to_plt -r #{path} --plt #{PLT_FILE}`
     end
