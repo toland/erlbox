@@ -114,16 +114,19 @@ maybe_analyze_cover(Opts) ->
     		cover:export(filename:join(CoverDir, "all.coverdata")),
 
             Modules = lists:reverse(cover:modules()),
-            F = fun(Mod) ->
+            F = fun(Mod, PctList) ->
                     {ok, {_, {Cov, NotCov}}} = cover:analyse(Mod, module),
                     Pct = (Cov / (Cov + NotCov)) * 100,
                     io:fwrite("~5B ~5B ~5.1f% ~p~n", [Cov, NotCov, Pct, Mod]),
 
                     OutFile = filename:join([CoverDir,
                         atom_to_list(Mod) ++ ".COVER.html"]),
-                    cover:analyse_to_file(Mod, OutFile, [html])
+                    cover:analyse_to_file(Mod, OutFile, [html]),
+
+                    [Pct|PctList]
                 end,
-            lists:map(F, Modules);
+            PctList = lists:foldl(F, [], Modules),
+            io:fwrite("~17.1f% TOTAL", [lists:sum(PctList) / length(PctList)]);
 
         false ->
             ok
