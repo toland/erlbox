@@ -28,7 +28,7 @@ parse_args(["-s", SuiteName|Rest], Opts) ->
     F = fun(Suites) -> [Suite|Suites] end,
     parse_args(Rest, dict:update(suites, F, [Suite], Opts));
 parse_args([Dir|Rest], Opts) ->
-    true = code:add_path(Dir),
+    true = code:add_patha(Dir),
     parse_args(Rest, dict:store(test_dir, Dir, Opts)).
 
 find_test_files(Opts) ->
