@@ -8,7 +8,9 @@
 ## -------------------------------------------------------------------
 ## Constants
 
-EUNIT_SRC = FileList['test/*_tests.erl']
+EUNIT_SRC = FileList['test/*.erl']
+EUNIT_SRC.exclude('test/*_SUITE.erl') # exclude CT suites
+
 EUNIT_BEAM = EUNIT_SRC.pathmap('%X.beam')
 EUNIT_LOG_DIR = TEST_LOG_DIR
 EUNIT_WORK_DIR = "#{EUNIT_LOG_DIR}/working"
@@ -49,6 +51,9 @@ namespace :eunit do
 end
 
 task :eunit => 'eunit:test'
+
+## -------------------------------------------------------------------
+## Helpers
 
 def run_eunit(dir, cover = false, rest = '')
   puts "running tests in #{dir}#{' with coverage' if cover}..."
