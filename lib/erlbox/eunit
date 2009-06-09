@@ -4,6 +4,7 @@
 main(Args) ->
     Opts = parse_args(Args, dict:new()),
     Files = find_test_files(Opts),
+    ok = init_logging(Opts),
     maybe_cover_compile(Opts),
     eunit:test(test_names(Files), test_flags(Opts)),
     maybe_analyze_cover(Opts).
@@ -17,6 +18,8 @@ parse_args(["-cover"|Rest], Opts) ->
     parse_args(Rest, dict:store(cover, true, Opts));
 parse_args(["-o", Dir|Rest], Opts) ->
     parse_args(Rest, dict:store(cover_dir, Dir, Opts));
+parse_args(["-l", LogFile|Rest], Opts) ->
+    parse_args(Rest, dict:store(log_file, LogFile, Opts));
 parse_args(["-b", Path|Rest], Opts) ->
     true = code:add_path(Path),
     parse_args(Rest, dict:store(bin_dir, Path, Opts));
@@ -55,6 +58,17 @@ find_test_files(Opts) ->
 
         {ok, Suites} ->
             Suites
+    end.
+
+init_logging(Opts) ->
+    % Turn off logging to to tty
+    ok = error_logger:tty(false),
+    % send logging to a log file
+    case dict:find(log_file, Opts) of
+        error ->
+            ok; % logging disabled
+        {ok, LogFile} ->
+            error_logger:logfile({open, LogFile})
     end.
 
 test_names(Files) ->

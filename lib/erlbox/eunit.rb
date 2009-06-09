@@ -22,10 +22,12 @@ rule '.beam' => "%X.erl" do |t|
   sh "erlc #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)} -o #{dir} #{t.source}"
 end
 
+directory TEST_LOG_DIR
+
 namespace :eunit do
 
   desc 'Eunit test preparation'
-  task :prepare do
+  task :prepare => [TEST_LOG_DIR] do
     # Always compile tests with debug info
     puts 'Debugging is enabled for test builds.'
     ERLC_FLAGS << '+debug_info'
@@ -54,7 +56,7 @@ def run_eunit(dir, cover = false, rest = '')
 
   script = __FILE__.sub('.rb', '')
 
-  cmd = "#{script} -b ./ebin #{cover_flags} #{all_suites} #{dir}"
+  cmd = "#{script} -b ./ebin -l #{TEST_LOG_DIR}/eunit.log #{cover_flags} #{all_suites} #{dir}"
 
   puts cmd.squeeze(' ') if verbose?
 
