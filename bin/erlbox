@@ -1,0 +1,111 @@
+#!/usr/bin/env ruby -w
+# -*- ruby -*-
+
+require 'yaml'
+require 'uri'
+
+def erl_root(location = nil)
+  cmd = "erl -noshell -eval 'io:format(\"~s\\n\", [code:root_dir()]).' -s erlang halt"
+  if location
+    cmd = File.join(location, "bin", cmd)
+  end
+  `#{cmd}`
+end
+
+def load_config()
+  # Check for existence of the config file -- we MUST have one
+  filename = File.expand_path("~/.erlbox.yaml")
+  if not File.exist?(filename)
+    puts "~/.erlbox.yaml does not exist; basic config required!"
+    exit 1
+  end
+
+  # Load the file and make sure required parameters are present
+  config = YAML::load(File.read(filename))
+
+  # Fix up default repo URL
+  if config.has_key?('default_repo')
+    url = URI(config['default_repo'])
+    if url.scheme == nil or url.scheme == "file":
+        config['defaut_repo'] = File.expand_path(url.path)
+    end
+  end
+
+  # If erlang repo is specified, expand the path and use that to determine the root
+  if config.has_key?('erlang')
+    config['erlang_root'] = erl_root(File.expand_path(config['erlang'])).strip()
+  else
+    config['erlang_root'] = erl_root().strip()
+  end
+
+  config
+end
+
+def download_app(appurl)
+  # Work directory will be /tmp/erlbox.<pid>
+  tmpdir = "/tmp/erlbox.#{Process.pid}"
+  
+  # Clone the desired url using GIT
+  # TODO: Support alternative systems
+  cmd = "git clone #{appurl} #{tmpdir}/"
+  puts cmd
+  system cmd
+  if $? != 0
+    exit 1
+  end
+
+  # Return the tmp directory path 
+  puts tmpdir
+  tmpdir
+end
+
+def install_app(appname)
+  # Default workdir is current working directory -- examination of appname may 
+  # override this.
+  workdir = ""
+
+  # Parse appname as URI
+  appname_uri = URI(appname)
+  if appname == ""
+    # Appname was not specified -- we'll try to use the current directory
+    workdir = Dir.getwd
+  elsif appname_uri.scheme == nil or appname_uri.scheme == "file"
+    # Expand the file path -- however, it may not match anything local; in that case,
+    # prepend the default URL for git repos and try to get it from there.
+    appname_path = File.expand_path(appname_uri.path)
+    if File.directory?(appname_path)
+      workdir = appname_path
+    else
+      workdir = download_app(File.join(CONFIG['default_repo'], appname))
+    end
+
+  else
+    # Appname is a proper URL -- we'll pass this to git
+    workdir = download_app(appname)
+  end
+
+  ##
+  # TODO: Process any dependencies in workdir/erlbox.deps
+  ##
+
+  # Now check the work directory for a Rakefile -- if it's present, tell the app to install
+  # itself in the provided erlang root directory (per erlang specs)
+  # TODO: Handle downloads of pre-built stuff
+  if File.exist?(File.join(workdir, "Rakefile"))
+    system "(cd #{workdir} && rake 'erlbox:install[#{CONFIG['erlang_root']}]')"
+  else
+    puts "No Rakefile available for #{appname} in #{workdir}; can't install this app!"
+    exit 1
+  end
+end
+
+CONFIG = load_config()
+#puts "Default repo: #{CONFIG['url']}"
+#puts "Erlang: #{CONFIG['erlang_root']}"
+
+action = ARGV[0]
+if action == "install"  
+  install_app(ARGV[1])
+else
+  puts "Usage: erlbox install ..."
+end
