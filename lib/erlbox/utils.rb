@@ -31,8 +31,13 @@ def expand_path(path)
   path.empty? ? '' : "-pa #{path.join(' -pa ')}"
 end
 
-def erl_run(script, args = "")
-  `erl -eval '#{script}' -s erlang halt #{args} -noshell 2>&1`.strip
+def erl_run(script, args = "", extra_args = {})
+  if extra_args[:erl_root]
+    cmd = File.join(extra_args[:erl_root], "bin", "erl")
+  else
+    cmd = "erl"
+  end
+  `#{cmd} -eval '#{script}' -s erlang halt #{args} -noshell 2>&1`.strip
 end
 
 def erl_where(lib, dir = 'include')
@@ -42,13 +47,13 @@ def erl_where(lib, dir = 'include')
   erl_run(script)
 end
 
-def erl_app_version(app)
+def erl_app_version(app, extra_args = {})
   script = <<-ERL
      ok = application:load(#{app}),
      {ok, Vsn} = application:get_key(#{app}, vsn),
      io:format("~s\\n", [Vsn]).
      ERL
-  output = erl_run(script, "-pa ebin")
+  output = erl_run(script, "-pa ebin", extra_args)
   output.strip()
 end
 
