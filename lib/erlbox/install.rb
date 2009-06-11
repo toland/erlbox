@@ -20,6 +20,7 @@ namespace :erlbox do
     end
 
     puts "Installing to #{install_dir}"
+    FileUtils.mkdir install_dir
     FileUtils.cp_r 'ebin', install_dir
     FileUtils.cp_r 'src', install_dir
     FileUtils.cp_r 'include', install_dir if File.exist?('include')
