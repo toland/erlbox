@@ -1,1 +1,1 @@
-See http://projects.rascal/projects/erlbox/wiki/ for documentation.
+See http://wiki.github.com/toland/erlbox for documentation.
