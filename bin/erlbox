@@ -58,6 +58,10 @@ def load_config()
     config['erlang_root'] = erl_root().strip()
   end
 
+  if !config.has_key?('site_dir')
+    config['site_dir'] = File.join(config['erlang_root'], "lib")
+  end
+
   config
 end
 
@@ -112,7 +116,7 @@ def install_app(appname)
   # itself in the provided erlang root directory (per erlang specs)
   # TODO: Handle downloads of pre-built stuff
   if File.exist?(File.join(workdir, "Rakefile"))
-    system "(cd #{workdir} && rake 'erlbox:install[#{CONFIG['erlang_root']}]')"
+    system "(cd #{workdir} && rake 'erlbox:install[#{CONFIG['erlang_root']},#{CONFIG['site_dir']}]')"
   else
     puts "No Rakefile available for #{appname} in #{workdir}; can't install this app!"
     exit 1

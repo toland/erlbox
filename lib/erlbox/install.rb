@@ -27,9 +27,9 @@ namespace :erlbox do
   
   desc "Install the application into the specified Erlang root"
   task :install => [:compile]
-  task :install, [:root_dir] do | t, args |
+  task :install, [:root_dir, :site_dir] do | t, args |
     appid = APP_NAME + "-" + erl_app_version(APP_NAME, :erl_root => args.root_dir)
-    install_dir = File.join(args.root_dir, "lib", appid)
+    install_dir = File.join(args.site_dir, appid)
 
     # Check that the target directory doesn't already exist -- bail if it does
     if File.directory?(install_dir)
@@ -37,7 +37,7 @@ namespace :erlbox do
       exit 1
     end
 
-    puts "Installing to #{install_dir}"
+    puts "Installing to #{install_dir}..."
     FileUtils.mkdir install_dir
     FileUtils.cp_r 'ebin', install_dir
     FileUtils.cp_r 'src', install_dir
@@ -47,4 +47,3 @@ namespace :erlbox do
   end
 
 end
-  
