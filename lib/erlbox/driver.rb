@@ -41,6 +41,13 @@ def erts_dir()
   erl_run(script)
 end
 
+def ei_dir()
+  script = <<-ERL
+      io:format("~s\n", [code:lib_dir(erl_interface)])
+      ERL
+  erl_run(script)
+end
+
 def erts_link_cflags()
   if darwin?
     %w(-fPIC -bundle -flat_namespace -undefined suppress)
@@ -59,9 +66,10 @@ C_OBJS  = C_SRCS.pathmap("%X.o")
 DRV_DIR = 'priv'
 DRIVER  = "#{DRV_DIR}/#{APP_NAME}_drv.so"
 
-CC_FLAGS = %W(-g -c -Wall -Werror -fPIC #{dflag()} -I#{erts_dir()}/include)
+CC_FLAGS = %W(-g -c -Wall -fno-common #{dflag()} -I#{SRC_DIR} -I#{erts_dir()}/include -I#{ei_dir()}/include)
 LD_FLAGS = erts_link_cflags()
-LD_LIBS  = []
+EI_LIBS  = %W(-L#{ei_dir()}/lib -lerl_interface -lei)
+LD_LIBS  = EI_LIBS
 
 CLEAN.include %W( #{SRC_DIR}/*.o #{DRV_DIR}/*.so  )
 
