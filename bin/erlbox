@@ -119,7 +119,15 @@ def install_app(appname)
     # Run the prepare task in a separate rake process so that computed
     # dependencies will work out right
     system "(cd #{workdir} && rake erlbox:prepare)"
-    system "(cd #{workdir} && rake 'erlbox:install[#{CONFIG['erlang_root']},#{CONFIG['site_dir']}]')"
+
+    cmd = "(cd #{workdir} && rake 'erlbox:install[#{CONFIG['erlang_root']},#{CONFIG['site_dir']}]')"
+    if system cmd
+      # clean up
+      puts "Install successful, cleaning up..."
+      FileUtils.rm_rf workdir
+    else
+      puts "Rake failed! Build files are in '#{workdir}'."
+    end
   else
     puts "No Rakefile available for #{appname} in #{workdir}; can't install this app!"
     exit 1
