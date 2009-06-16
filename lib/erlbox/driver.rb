@@ -86,7 +86,7 @@ end
 
 file DRIVER => [SRC_DIR, DRV_DIR] + C_OBJS do
   puts "linking #{DRIVER}..."
-  sh "gcc -g #{print_flags(LD_FLAGS)} #{SRC_DIR}/*.o #{print_flags(LD_LIBS)} -o #{DRIVER}", :verbose => verbose?
+  sh "gcc -g #{print_flags(LD_FLAGS)} #{C_OBJS.join(' ')} #{print_flags(LD_LIBS)} -o #{DRIVER}", :verbose => verbose?
 end
 
 ## -------------------------------------------------------------------
