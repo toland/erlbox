@@ -139,8 +139,11 @@ CONFIG = load_config()
 #puts "Erlang: #{CONFIG['erlang_root']}"
 
 action = ARGV[0]
-if action == "install"  
+case action
+when 'install'
   install_app(ARGV[1])
+when 'cleanup'
+  FileUtils.rm_rf Dir.glob("/tmp/erlbox.*")
 else
   puts "Usage: erlbox install ..."
 end
