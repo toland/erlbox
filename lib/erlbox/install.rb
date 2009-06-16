@@ -24,9 +24,12 @@
 ## -------------------------------------------------------------------
 
 namespace :erlbox do
-  
+
+  # This task is a hook to allow bootstrapping a new repo
+  task :prepare
+
   desc "Install the application into the specified Erlang root"
-  task :install => [:compile]
+  task :install => [:prepare, :compile]
   task :install, [:root_dir, :site_dir] do | t, args |
     appid = APP_NAME + "-" + erl_app_version(APP_NAME, :erl_root => args.root_dir)
     install_dir = File.join(args.site_dir, appid)

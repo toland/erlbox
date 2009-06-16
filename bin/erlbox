@@ -116,6 +116,9 @@ def install_app(appname)
   # itself in the provided erlang root directory (per erlang specs)
   # TODO: Handle downloads of pre-built stuff
   if File.exist?(File.join(workdir, "Rakefile"))
+    # Run the prepare task in a separate rake process so that computed
+    # dependencies will work out right
+    system "(cd #{workdir} && rake erlbox:prepare)"
     system "(cd #{workdir} && rake 'erlbox:install[#{CONFIG['erlang_root']},#{CONFIG['site_dir']}]')"
   else
     puts "No Rakefile available for #{appname} in #{workdir}; can't install this app!"
