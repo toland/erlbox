@@ -79,7 +79,7 @@ CLEAN.include %W( #{SRC_DIR}/*.o #{DRV_DIR}/*.so  )
 directory SRC_DIR
 directory DRV_DIR
 
-rule ".o" => ["%X.c", "%X.h"] do |t|
+rule '.o' => ['.c'] do |t|
   puts "compiling #{t.source}..."
   sh "gcc #{print_flags(CC_FLAGS)} #{t.source} -o #{t.name}", :verbose => verbose?
 end
