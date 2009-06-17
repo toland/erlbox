@@ -88,7 +88,13 @@ def download_app(appurl)
   tmpdir
 end
 
-def install_app(appname)
+def install_app(appname, stack = [])
+  # Check for a dependency cycle
+  if stack.include?(appname)
+    puts "Install failed: dependency cycle detected."
+    exit(1)
+  end
+
   # Default workdir is current working directory -- examination of appname may 
   # override this.
   workdir = ""
@@ -117,12 +123,17 @@ def install_app(appname)
     end
   end
 
-  ##
-  # TODO: Process any dependencies in workdir/erlbox.deps
-  ##
+  # Process any dependencies in workdir/erlbox.yml
+  app_config = load_yaml("#{workdir}/erlbox.yaml")
+  unless app_config.nil? || app_config.empty?
+    deps = app_config['dependencies'] || []
+    deps.each do |dep|
+      install_app(dep, stack << appname)
+    end
+  end
 
-  # Now check the work directory for a Rakefile -- if it's present, tell the app to install
-  # itself in the provided erlang root directory (per erlang specs)
+  # Now check the work directory for a Rakefile -- if it's present, tell the app
+  # to install itself in the provided erlang root directory (per erlang specs)
   # TODO: Handle downloads of pre-built stuff
   if File.exist?(File.join(workdir, "Rakefile"))
     # Run the prepare task in a separate rake process so that computed
