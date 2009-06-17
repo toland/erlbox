@@ -94,26 +94,27 @@ def install_app(appname)
   workdir = ""
   is_temp = false
 
-  # Parse appname as URI
-  appname_uri = URI(appname)
-  if appname == ""
+  if appname.nil? || appname.empty?
     # Appname was not specified -- we'll try to use the current directory
     workdir = Dir.getwd
-  elsif appname_uri.scheme == nil or appname_uri.scheme == "file"
-    # Expand the file path -- however, it may not match anything local; in that case,
-    # prepend the default URL for git repos and try to get it from there.
-    appname_path = File.expand_path(appname_uri.path)
-    if File.directory?(appname_path)
-      workdir = appname_path
+  else
+    # Parse appname as URI
+    appname_uri = URI.parse(appname)
+    if appname_uri.scheme == nil or appname_uri.scheme == "file"
+      # Expand the file path -- however, it may not match anything local; in that
+      # case, prepend the default URL for git repos and try to get it from there.
+      appname_path = File.expand_path(appname_uri.path)
+      if File.directory?(appname_path)
+        workdir = appname_path
+      else
+        workdir = download_app(File.join(CONFIG['default_repo'], appname))
+        is_temp = true
+      end
     else
-      workdir = download_app(File.join(CONFIG['default_repo'], appname))
+      # Appname is a proper URL -- we'll pass this to git
+      workdir = download_app(appname)
       is_temp = true
     end
-
-  else
-    # Appname is a proper URL -- we'll pass this to git
-    workdir = download_app(appname)
-    is_temp = true
   end
 
   ##
