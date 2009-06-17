@@ -96,8 +96,8 @@ end
 def install_app(appname, stack = [])
   # Check for a dependency cycle
   if stack.include?(appname)
-    puts "Install failed: dependency cycle detected."
-    exit(1)
+    puts "#{appname} already scheduled for installation"
+    return
   end
 
   # Default workdir is current working directory -- examination of appname may 
@@ -128,7 +128,22 @@ def install_app(appname, stack = [])
     end
   end
 
-  # Process any dependencies in workdir/erlbox.yml
+  # Now check the work directory for a Rakefile
+  if !File.exist?(File.join(workdir, "Rakefile"))
+    puts "No Rakefile available for #{appname} in #{workdir}; can't install this app!"
+    exit 1
+  end
+
+  appid = `(cd #{workdir} && rake --silent install:appid[#{CONFIG['erlang_root']}])`.strip
+  install_dir = File.join(CONFIG['site_dir'], appid)
+
+  # Check that the target directory doesn't already exist -- bail if it does
+  if File.directory?(install_dir)
+    puts "#{appid} is already installed...skipping"
+    return
+  end
+
+  # Process any dependencies in workdir/erlbox.yaml
   app_config = load_yaml("#{workdir}/erlbox.yaml")
   unless app_config.nil? || app_config.empty?
     deps = app_config['dependencies'] || []
@@ -137,31 +152,32 @@ def install_app(appname, stack = [])
     end
   end
 
-  # Now check the work directory for a Rakefile -- if it's present, tell the app
-  # to install itself in the provided erlang root directory (per erlang specs)
+  # Tell the app to build itself and install in the provided site directory
   # TODO: Handle downloads of pre-built stuff
-  if File.exist?(File.join(workdir, "Rakefile"))
-    # Run the prepare task in a separate rake process so that computed
-    # dependencies will work out right
-    system "(cd #{workdir} && rake erlbox:prepare)"
 
-    cmd = "(cd #{workdir} && rake 'erlbox:install[#{CONFIG['erlang_root']},#{CONFIG['site_dir']}]')"
-    if system cmd
-      # clean up
-      puts "Install successful, cleaning up..."
-      FileUtils.rm_rf workdir if is_temp
-    else
-      puts "Rake failed! Build files are in '#{workdir}'."
-    end
+  # Run the prepare task in a separate rake process so that computed
+  # dependencies will work out right
+  system "(cd #{workdir} && rake --silent install:prepare)"
+  system "(cd #{workdir} && rake --silent install:build)"
+
+  if $? == 0
+    puts "Installing to #{install_dir}..."
+    FileUtils.mkdir install_dir
+    FileUtils.cp_r "#{workdir}/ebin", install_dir
+    FileUtils.cp_r "#{workdir}/src", install_dir
+    FileUtils.cp_r "#{workdir}/include", install_dir if File.exist?("#{workdir}/include")
+    FileUtils.cp_r "#{workdir}/priv", install_dir if File.exist?("#{workdir}/priv")
+    FileUtils.cp_r "#{workdir}/mibs", install_dir if File.exist?("#{workdir}/mibs")
+
+    # clean up
+    puts "Install successful, cleaning up..."
+    FileUtils.rm_rf workdir if is_temp
   else
-    puts "No Rakefile available for #{appname} in #{workdir}; can't install this app!"
-    exit 1
+    puts "Rake failed! Build files are in '#{workdir}'."
   end
 end
 
 CONFIG = load_config()
-#puts "Default repo: #{CONFIG['url']}"
-#puts "Erlang: #{CONFIG['erlang_root']}"
 
 action = ARGV[0]
 case action

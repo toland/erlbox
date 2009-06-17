@@ -23,30 +23,16 @@
 ##
 ## -------------------------------------------------------------------
 
-namespace :erlbox do
+namespace :install do
 
-  # This task is a hook to allow bootstrapping a new repo
+  task :appid, [:root_dir] do |t, args|
+    puts "#{APP_NAME}-#{erl_app_version(APP_NAME, :erl_root => args.root_dir)}"
+  end
+
+  desc "Hook to allow bootstrapping a new repo during installation"
   task :prepare
 
-  desc "Install the application into the specified Erlang root"
-  task :install => [:prepare, :compile]
-  task :install, [:root_dir, :site_dir] do | t, args |
-    appid = APP_NAME + "-" + erl_app_version(APP_NAME, :erl_root => args.root_dir)
-    install_dir = File.join(args.site_dir, appid)
-
-    # Check that the target directory doesn't already exist -- bail if it does
-    if File.directory?(install_dir)
-      puts "#{appid} has already been installed!"
-      exit 1
-    end
-
-    puts "Installing to #{install_dir}..."
-    FileUtils.mkdir install_dir
-    FileUtils.cp_r 'ebin', install_dir
-    FileUtils.cp_r 'src', install_dir
-    FileUtils.cp_r 'include', install_dir if File.exist?('include')
-    FileUtils.cp_r 'priv', install_dir if File.exist?('priv')
-    FileUtils.cp_r 'mibs', install_dir if File.exist?('mibs')
-  end
+  desc "Build the application for installation"
+  task :build => [:compile]
 
 end
