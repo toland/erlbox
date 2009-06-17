@@ -32,16 +32,21 @@ def erl_root(location = nil)
   `#{cmd}`
 end
 
+def load_yaml(file)
+  filename = File.expand_path(file)
+  return nil if not File.exist?(filename)
+  YAML::load(File.read(filename))
+end
+
 def load_config()
   # Check for existence of the config file -- we MUST have one
-  filename = File.expand_path("~/.erlbox.yaml")
-  if not File.exist?(filename)
-    puts "~/.erlbox.yaml does not exist; basic config required!"
-    exit 1
-  end
+  config = load_yaml("~/.erlbox.yaml")
 
   # Load the file and make sure required parameters are present
-  config = YAML::load(File.read(filename))
+  if config.nil? || config.empty?
+    puts "~/.erlbox.yaml does not exist or is empty; basic config required!"
+    exit 1
+  end
 
   # Fix up default repo URL
   if config.has_key?('default_repo')
