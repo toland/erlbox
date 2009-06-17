@@ -92,6 +92,7 @@ def install_app(appname)
   # Default workdir is current working directory -- examination of appname may 
   # override this.
   workdir = ""
+  is_temp = false
 
   # Parse appname as URI
   appname_uri = URI(appname)
@@ -106,11 +107,13 @@ def install_app(appname)
       workdir = appname_path
     else
       workdir = download_app(File.join(CONFIG['default_repo'], appname))
+      is_temp = true
     end
 
   else
     # Appname is a proper URL -- we'll pass this to git
     workdir = download_app(appname)
+    is_temp = true
   end
 
   ##
@@ -129,7 +132,7 @@ def install_app(appname)
     if system cmd
       # clean up
       puts "Install successful, cleaning up..."
-      FileUtils.rm_rf workdir
+      FileUtils.rm_rf workdir if is_temp
     else
       puts "Rake failed! Build files are in '#{workdir}'."
     end
