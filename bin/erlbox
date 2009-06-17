@@ -83,6 +83,11 @@ def download_app(appurl)
     exit 1
   end
 
+  # Handle git submodules
+  if File.exist?("#{tmpdir}/.gitmodules")
+    system "git submodule update --init"
+  end
+
   # Return the tmp directory path 
   puts tmpdir
   tmpdir
