@@ -93,6 +93,17 @@ def download_app(appurl)
   tmpdir
 end
 
+def install_deps(workdir, appname = nil, stack = [])
+  # Process any dependencies in workdir/erlbox.yaml
+  app_config = load_yaml("#{workdir}/erlbox.yaml")
+  unless app_config.nil? || app_config.empty?
+    deps = app_config['dependencies'] || []
+    deps.each do |dep|
+      install_app(dep, stack << appname)
+    end
+  end
+end
+
 def install_app(appname, stack = [])
   # Check for a dependency cycle
   if stack.include?(appname)
@@ -143,14 +154,7 @@ def install_app(appname, stack = [])
     return
   end
 
-  # Process any dependencies in workdir/erlbox.yaml
-  app_config = load_yaml("#{workdir}/erlbox.yaml")
-  unless app_config.nil? || app_config.empty?
-    deps = app_config['dependencies'] || []
-    deps.each do |dep|
-      install_app(dep, stack << appname)
-    end
-  end
+  install_deps(workdir, appname, stack)
 
   # Tell the app to build itself and install in the provided site directory
   # TODO: Handle downloads of pre-built stuff
@@ -185,6 +189,8 @@ when 'install'
   install_app(ARGV[1])
 when 'cleanup'
   FileUtils.rm_rf Dir.glob("/tmp/erlbox.*")
+when 'ensure'
+  install_deps(Dir.getwd())
 else
   puts "Usage: erlbox install ..."
 end
