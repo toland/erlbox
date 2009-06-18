@@ -70,9 +70,9 @@ def load_config()
   config
 end
 
-def download_app(appurl)
+def download_app(appname, appurl)
   # Work directory will be /tmp/erlbox.<pid>
-  tmpdir = "/tmp/erlbox.#{Process.pid}"
+  tmpdir = "/tmp/erlbox_#{appname}.#{Process.pid}"
   
   # Clone the desired url using GIT
   # TODO: Support alternative systems
@@ -129,12 +129,12 @@ def install_app(appname, stack = [])
       if File.directory?(appname_path)
         workdir = appname_path
       else
-        workdir = download_app(File.join(CONFIG['default_repo'], appname))
+        workdir = download_app(appname, File.join(CONFIG['default_repo'], appname))
         is_temp = true
       end
     else
       # Appname is a proper URL -- we'll pass this to git
-      workdir = download_app(appname)
+      workdir = download_app(appname, appname)
       is_temp = true
     end
   end
@@ -188,7 +188,7 @@ case action
 when 'install'
   install_app(ARGV[1])
 when 'cleanup'
-  FileUtils.rm_rf Dir.glob("/tmp/erlbox.*")
+  FileUtils.rm_rf Dir.glob("/tmp/erlbox_*")
 when 'ensure'
   install_deps(Dir.getwd())
 else
