@@ -93,6 +93,12 @@ def download_app(appname, appurl)
   tmpdir
 end
 
+def cleanup(workdir, is_temp)
+  # clean up
+  puts "Cleaning up..."
+  FileUtils.rm_rf workdir if is_temp
+end
+
 def install_deps(workdir, appname = nil, stack = [])
   # Process any dependencies in workdir/erlbox.yaml
   app_config = load_yaml("#{workdir}/erlbox.yaml")
@@ -151,6 +157,7 @@ def install_app(appname, stack = [])
   # Check that the target directory doesn't already exist -- bail if it does
   if File.directory?(install_dir)
     puts "#{appid} is already installed...skipping"
+    cleanup(workdir, is_temp)
     return
   end
 
@@ -173,9 +180,8 @@ def install_app(appname, stack = [])
     FileUtils.cp_r "#{workdir}/priv", install_dir if File.exist?("#{workdir}/priv")
     FileUtils.cp_r "#{workdir}/mibs", install_dir if File.exist?("#{workdir}/mibs")
 
-    # clean up
-    puts "Install successful, cleaning up..."
-    FileUtils.rm_rf workdir if is_temp
+    puts "Install successful..."
+    cleanup(workdir, is_temp)
   else
     puts "Rake failed! Build files are in '#{workdir}'."
   end
