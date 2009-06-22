@@ -6,10 +6,10 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Phillip Toland"]
-  s.date = %q{2009-06-19}
+  s.date = %q{2009-06-22}
   s.default_executable = %q{erlbox}
   s.description = %q{Rake tasks and helper scripts for building Erlang applications.}
-  s.email = %q{ptoland@thehive.com}
+  s.email = %q{phil.toland@gmail.com}
   s.executables = ["erlbox"]
   s.extra_rdoc_files = [
     "LICENSE",
@@ -39,9 +39,10 @@ Gem::Specification.new do |s|
      "lib/erlbox/test.rb",
      "lib/erlbox/utils.rb"
   ]
-  s.homepage = %q{http://projects.rascal/projects/erlbox}
+  s.homepage = %q{http://github.com/toland/erlbox}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
+  s.rubyforge_project = %q{erlbox}
   s.rubygems_version = %q{1.3.2}
   s.summary = %q{Erlang Toolbox}
 

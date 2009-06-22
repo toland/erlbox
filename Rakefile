@@ -27,12 +27,14 @@ begin
     s.name         = 'erlbox'
     s.platform     = Gem::Platform::RUBY
     s.author       = 'Phillip Toland'
-    s.email        = 'ptoland@thehive.com'
-    s.homepage     = 'http://projects.rascal/projects/erlbox'
+    s.email        = 'phil.toland@gmail.com'
+    s.homepage     = 'http://github.com/toland/erlbox'
     s.summary      = 'Erlang Toolbox'
     s.description  = 'Rake tasks and helper scripts for building Erlang applications.'
     s.require_path = 'lib'
     s.has_rdoc     = false
+
+    s.rubyforge_project = 'erlbox'
 
     s.files.include 'lib/erlbox/eunit'
 
