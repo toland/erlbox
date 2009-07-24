@@ -25,6 +25,7 @@
 require 'erb'
 require 'rake/clean'
 require 'erlbox/utils'
+require 'yaml'
 include FileUtils
 
 def build_node(nodefile)
@@ -174,9 +175,3 @@ end
 #   end
 # end
 
-# desc "Create a tarball from the staged application"
-# task :release => :stage do
-#   mv REL_APPNAME, REL_FULLNAME
-#   sh "tar -cjf #{REL_FULLNAME}-#{RUBY_PLATFORM}.tar.bz2 #{REL_FULLNAME}"
-#   rm_rf REL_FULLNAME
-# end
