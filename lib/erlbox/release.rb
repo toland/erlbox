@@ -22,51 +22,161 @@
 ## THE SOFTWARE.
 ##
 ## -------------------------------------------------------------------
+require 'erb'
 require 'rake/clean'
+require 'erlbox/utils'
 include FileUtils
 
-if !defined?(REL_APPNAME)
-  fail "The variable REL_APPNAME must be defined"
+def build_node(nodefile)
+  # Load the YAML descriptor
+  node_desc = load_node_yaml(nodefile)
+
+  # Pull out vars we'll need often
+  relname = node_desc['release']
+  relvers = node_desc['version']
+  relid = "#{relname}-#{relvers}"
+  erts_vsn = erts_version()
+
+  # Merge list of apps into a space separated string
+  apps = node_desc['apps'].join(' ')
+
+  # Run the make-rel script -- this will yield the following files:
+  # <relname>-<relver>.[boot, rel, script, .tar.gz]
+  reltools_dir = File.join(File.dirname(__FILE__), "reltools")
+  script = File.join(reltools_dir, "make-rel")
+  cmd = "#{script} #{relname} #{relvers} #{node_desc['code_path']} #{apps}"
+  sh cmd
+
+  # Unpack the systool generated tarball
+  FileUtils.remove_dir(relname, force = true)
+  FileUtils.mkdir(relname)
+  sh "tar -xzf #{relid}.tar.gz -C #{relname}"
+
+  # Cleanup interstitial files from systools
+  FileUtils.remove(["#{relid}.boot", "#{relid}.script", "#{relid}.rel", "#{relid}.tar.gz"])
+
+  # Create release file
+  File.open("#{relname}/releases/start_erl.data", 'w') { |f| f.write("#{erts_vsn} #{relvers}\n") }
+
+  # Copy overlay into place (if present)
+  if node_desc.has_key?('overlay')
+    sh "cp -R #{node_desc['overlay']}/* #{relname}" # Had issues with FileUtils.cp_r doing wrong thing
+  end
+
+  # Remove any files from the erts bin/ that are scripts -- we want only executables
+  erts_bin = File.join(relname, "erts-" + erts_vsn, "bin")
+  sh "rm -f `file #{erts_bin}/* |grep Bourne|awk -F: '{print $1}'`"
+
+  # Copy nodetool into erts-<vsn>/bin 
+  FileUtils.cp(File.join(reltools_dir, "nodetool"), erts_bin)
+
+  # Copy our custom erl.sh and the necessary .boot file into erts-<vsn>/bin. This is necessary
+  # to enable escript to work properly
+  FileUtils.cp(File.join(reltools_dir, "erl.sh"), File.join(erts_bin, "erl"))
+  FileUtils.cp(File.join(erl_root(), "bin", "start.boot"), File.join(erts_bin, "erl.boot"))
+
+  # Create any requested empty-dirs
+  if node_desc.has_key?('empty_dirs')
+    node_desc['empty_dirs'].each { |d| FileUtils.mkdir_p(File.join(relname, d)) }
+  end
+
+  # Make sure bin directory exists and copy the runner
+  FileUtils.mkdir_p File.join(relname, "bin")
+  copy_runner(node_desc, reltools_dir)
+  
 end
 
-verbose false
+def copy_runner(node_desc, reltools_dir)
+  ## Get the hash of config values for the runner from descriptor
+  runner_opts = node_desc.fetch('runner', {}); 
+                                  
+  runner_base_dir = runner_opts.fetch('base_dir', ".")
+  runner_etc_dir  = runner_opts.fetch('etc_dir', "$RUNNER_BASE_DIR/etc")
+  runner_log_dir  = runner_opts.fetch('log_dir', "$RUNNER_BASE_DIR/log")
+  runner_user     = runner_opts.fetch('user', "")
 
-CLEAN.include FileList["#{REL_APPNAME}*"]
+  ## Load the template ERB and do the substitution
+  template = ERB.new(File.new(File.join(reltools_dir, "runner.erb")).read)
+  target = File.open(File.join(node_desc['release'], "bin", node_desc['release']), "w")
+  target.write(template.result(binding))
 
-REL_APPS = %w( runtime_tools )
-REL_VERSION  = `cat vers/#{REL_APPNAME}.version`.strip
-REL_FULLNAME = "#{REL_APPNAME}-#{REL_VERSION}"
-
-ERTS_VSN = `scripts/get-erts-vsn`.strip
-
-directory REL_APPNAME
+  # Make sure the target is executable
+  target.chmod(0755)
+end
 
 
-task :build_app do
-  cd "../apps" do
-    sh "rake"
+def load_node_yaml(file)
+  # Load the YAML file
+  filename = File.expand_path(file)
+  fail "Node descriptor #{filename} does not exit!" if not File.exist?(filename)
+  node = YAML::load(File.read(filename))
+
+  # Make sure a release name and version are specified
+  if !node.has_key?('release') or !node.has_key?('version')
+    fail "Node descriptor must have a release and version specified."
+  end
+
+  # Make sure code path is swathed with quotes so that wildcards won't get processed by
+  # shell
+  if node.has_key?('code_path')
+    node['code_path'] = "\'#{node['code_path']}\'"
+  else
+    # If no code path is specified set an empty one
+    node['code_path'] = '""'
+  end
+
+  return node
+end
+
+
+## Setup a series of dynamic targets, based on the information available in the .node file.
+FileList['*.node'].each do |src|
+  name = src.pathmap("%X")
+  node_desc = load_node_yaml(src)
+
+  if node_desc != nil
+    relname = node_desc['release']
+    relvers = node_desc['version']
+    target = "#{relname}/releases/#{relname}-#{relvers}.rel"
+
+    # Construct task with base node name -- depends on the .rel file
+    desc "Builds #{relname} node"
+    task name => target
+
+    # .rel file is used for detecting if .node file changes and forcing a rebuild
+    file target => [src] do
+      build_node(src)
+    end
+
+    # Add release target (creates a tarball)
+    desc "Package #{relname} into a tarball"
+    task "#{name}:package" => [name] do
+      mv(name, "#{relname}-#{relvers}")
+      sh "tar -cjf #{relname}-#{relvers}-#{RUBY_PLATFORM}.tar.bz2 #{relname}-#{relvers}"
+      rm_rf("#{relname}-#{relvers}")
+    end
+
+    # Add cleanup target
+    desc "Clean #{relname} node"
+    task "#{name}:clean" do
+        FileUtils.remove_dir "#{relname}", true
+        FileUtils.remove Dir.glob("#{relname}-#{relvers}.*")
+      end
+
+    # Register cleanup stuff with clobber
+    CLOBBER.include << "#{relname}" << "#{relname}-#{relvers}.*"
   end
 end
 
-desc "Run the make-rel script"
-task :make_rel do
-  sh "scripts/make-rel #{REL_APPNAME} #{REL_VERSION} #{REL_APPS.join(' ')}"
-end
+# task :build_app do
+#   cd "../apps" do
+#     sh "rake"
+#   end
+# end
 
-task :prepare => [REL_APPNAME, :make_rel] do
-  sh "tar -xzf #{REL_FULLNAME}.tar.gz -C #{REL_APPNAME}"
-  rm "#{REL_FULLNAME}.tar.gz"
-
-  sh %Q(echo "#{ERTS_VSN} #{REL_VERSION}" > #{REL_APPNAME}/releases/start_erl.data)
-  cp_r Dir.glob("overlays/#{REL_APPNAME}/*"), REL_APPNAME
-end
-
-desc "Stage the application into a directory"
-task :stage => [:clean, :build_app, :prepare]
-
-desc "Create a tarball from the staged application"
-task :release => :stage do
-  mv REL_APPNAME, REL_FULLNAME
-  sh "tar -cjf #{REL_FULLNAME}-#{RUBY_PLATFORM}.tar.bz2 #{REL_FULLNAME}"
-  rm_rf REL_FULLNAME
-end
+# desc "Create a tarball from the staged application"
+# task :release => :stage do
+#   mv REL_APPNAME, REL_FULLNAME
+#   sh "tar -cjf #{REL_FULLNAME}-#{RUBY_PLATFORM}.tar.bz2 #{REL_FULLNAME}"
+#   rm_rf REL_FULLNAME
+# end

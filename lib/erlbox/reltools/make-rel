@@ -1,0 +1,85 @@
+#!/usr/bin/env escript
+%% -*- erlang -*-
+
+main([RelName, RelVer, CodePath | AppNames]) ->
+    %% Convert the app names into atom
+    Apps = [list_to_atom(A) || A <- AppNames],
+    case Apps of
+        [] ->
+            io:format("No applications provided for release!\n"),
+            halt(1);
+        _ ->
+            ok
+    end,
+
+    %% Setup code path so we can see all the apps
+    update_path(CodePath),
+
+    %% Identify dependencies across all apps
+    Deps = get_all_deps(Apps),
+
+    %% Get version info for all deps
+    DepVers = get_all_vers(Deps),
+
+    %% Determine the erts version
+    ErtsVsn = erlang:system_info(version),
+    
+    %% Generate the tuple for the release file
+    RelTuple = {release, {RelName, RelVer},  {erts, ErtsVsn}, DepVers},
+    
+    %% Write the .rel file
+    RelId = rel_id(RelName, RelVer),
+    {ok, F} = file:open([RelId, ".rel"], [write]),
+    ok = io:fwrite(F, "~p.\n", [RelTuple]),
+
+    %% Generate the boot script
+    ok = systools:make_script(RelId, [no_module_tests]),
+
+    %% Construct the tar
+    ok = systools:make_tar(RelId, [no_module_tests, {dirs, [mibs,src,include]}, {erts, code:root_dir()}]).
+
+
+update_path(CodePath) ->
+    case re:split(CodePath, ":", [{return, list}]) of
+        [[]] ->
+            ok;
+        Components ->
+            [ok = code:add_pathsa(filelib:wildcard(C)) || C <- Components]
+    end.
+
+get_all_vers(Apps) ->
+    [ {A, get_app_key(A, vsn)} || A <- Apps ].
+                  
+get_app_key(App, Key) ->    
+    application:load(App),
+    case application:get_key(App, Key) of
+        {ok, Value} ->
+            Value;
+        _Error ->
+            io:format("Error getting key ~p for app: ~p\n", [Key, App]),
+            halt(1)
+    end.
+
+get_all_deps(Apps) -> 
+    Deps = get_deps(Apps, []),
+
+    %% Consolidate the list so that there are no dups
+    sets:to_list(sets:from_list(lists:flatten([Apps | Deps]))).
+
+
+get_deps([], Acc) ->
+    Acc;
+get_deps([App | Rest], Acc) -> 
+    Apps = get_app_key(App, applications),
+    Deps = get_deps(Apps, Apps),
+    get_deps(Rest, [Deps | Acc]).
+
+
+format(Str, Args) ->
+    lists:flatten(io_lib:format(Str, Args)).
+
+
+rel_id(RelName, RelVer) ->
+    format("~s-~s", [RelName, RelVer]).
+
+
