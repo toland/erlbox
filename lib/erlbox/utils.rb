@@ -58,10 +58,24 @@ def erl_run(script, args = "", extra_args = {})
   `#{cmd} -eval '#{script}' -s erlang halt #{args} -noshell 2>&1`.strip
 end
 
+def erts_version()
+  script = <<-ERL
+      io:format("~s\n", [erlang:system_info(version)]).
+      ERL
+  erl_run(script)
+end
+
 def erl_where(lib, dir = 'include')
   script = <<-ERL
       io:format("~s\n", [filename:join(code:lib_dir(#{lib}), #{dir})])
       ERL
+  erl_run(script)
+end
+
+def erl_root()
+  script = <<-ERL
+     io:format("~s\n", [code:root_dir()])
+     ERL
   erl_run(script)
 end
 
