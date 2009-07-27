@@ -21,6 +21,9 @@ main([RelName, RelVer, CodePath | AppNames]) ->
     %% Get version info for all deps
     DepVers = get_all_vers(Deps),
 
+    %% Validate modules for each dep
+    check_modules(Deps),
+
     %% Determine the erts version
     ErtsVsn = erlang:system_info(version),
     
@@ -36,7 +39,7 @@ main([RelName, RelVer, CodePath | AppNames]) ->
     ok = systools:make_script(RelId, [no_module_tests]),
 
     %% Construct the tar
-    ok = systools:make_tar(RelId, [no_module_tests, {dirs, [mibs,src,include]}, {erts, code:root_dir()}]).
+    ok = systools:make_tar(RelId, [no_module_tests, {dirs, [mibs, src, include]}, {erts, code:root_dir()}]).
 
 
 update_path(CodePath) ->
@@ -83,3 +86,25 @@ rel_id(RelName, RelVer) ->
     format("~s-~s", [RelName, RelVer]).
 
 
+check_modules([]) ->
+    ok;
+check_modules([App | Rest]) ->
+    ModuleSet = ordsets:from_list(get_app_key(App, modules)),
+    Beams = filelib:wildcard(filename:join(code:lib_dir(App, ebin), "*.beam")),
+    BeamSet = ordsets:from_list([list_to_atom(filename:basename(F, ".beam")) || F <- Beams]),
+    case ordsets:subtract(BeamSet, ModuleSet) of
+        [] ->
+            ok;
+        MissingModules ->
+            [io:format("WARNING: ~s.app does not list ~s.beam as a module\n", [App, M]) || M <- MissingModules]
+    end,
+
+    case ordsets:subtract(ModuleSet, BeamSet) of
+        [] ->
+            ok;
+        MissingBeams ->
+            [io:format("WARNING: ~s.app does not have a ~s.beam\n", [App, B]) || B <- MissingBeams]
+    end,
+    check_modules(Rest).
+
+    
