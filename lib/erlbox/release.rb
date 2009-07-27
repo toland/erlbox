@@ -122,9 +122,16 @@ FileList['*.node'].each do |src|
     relname = node_desc['release']
     relvers = node_desc['version']
     target = "#{relname}/releases/#{relname}-#{relvers}.rel"
+    deps_target = "#{relname}:deps"
+
+    # Setup an empty deps target -- caller can override with their own definition
+    # to do something useful
+    desc "Build dependencies for #{relname} node"
+    task deps_target
 
     # Construct task with base node name -- depends on the .rel file
     desc "Builds #{relname} node"
+    task name => deps_target
     task name => target
 
     # .rel file is used for detecting if .node file changes and forcing a rebuild
