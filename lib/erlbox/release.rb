@@ -83,26 +83,9 @@ def build_node(nodefile)
 
   # Make sure bin directory exists and copy the runner
   FileUtils.mkdir_p File.join(relname, "bin")
-  copy_runner(node_desc, reltools_dir)
+  cp File.join(reltools_dir, "runner"), File.join(relname, "bin", relname)
+  chmod 0755, File.join(relname, "bin", relname)
   
-end
-
-def copy_runner(node_desc, reltools_dir)
-  ## Get the hash of config values for the runner from descriptor
-  runner_opts = node_desc.fetch('runner', {}); 
-                                  
-  runner_base_dir = runner_opts.fetch('base_dir', ".")
-  runner_etc_dir  = runner_opts.fetch('etc_dir', "$RUNNER_BASE_DIR/etc")
-  runner_log_dir  = runner_opts.fetch('log_dir', "$RUNNER_BASE_DIR/log")
-  runner_user     = runner_opts.fetch('user', "")
-
-  ## Load the template ERB and do the substitution
-  template = ERB.new(File.new(File.join(reltools_dir, "runner.erb")).read)
-  target = File.open(File.join(node_desc['release'], "bin", node_desc['release']), "w")
-  target.write(template.result(binding))
-
-  # Make sure the target is executable
-  target.chmod(0755)
 end
 
 
@@ -139,9 +122,16 @@ FileList['*.node'].each do |src|
     relname = node_desc['release']
     relvers = node_desc['version']
     target = "#{relname}/releases/#{relname}-#{relvers}.rel"
+    deps_target = "#{relname}:deps"
+
+    # Setup an empty deps target -- caller can override with their own definition
+    # to do something useful
+    desc "Build dependencies for #{relname} node"
+    task deps_target
 
     # Construct task with base node name -- depends on the .rel file
     desc "Builds #{relname} node"
+    task name => deps_target
     task name => target
 
     # .rel file is used for detecting if .node file changes and forcing a rebuild

@@ -50,11 +50,11 @@ process_args(["-setcookie", Cookie | Rest], Acc, TargetNode) ->
     erlang:set_cookie(node(), list_to_atom(Cookie)),
     process_args(Rest, Acc, TargetNode);
 process_args(["-name", TargetName | Rest], Acc, _) ->
-    ThisNode = append_node_suffix(TargetName, "_maint"),
+    ThisNode = append_node_suffix(TargetName, "_maint_"),
     {ok, _} = net_kernel:start([ThisNode, longnames]),
     process_args(Rest, Acc, nodename(TargetName));
 process_args(["-sname", TargetName | Rest], Acc, _) ->
-    ThisNode = append_node_suffix(TargetName, "_maint"),
+    ThisNode = append_node_suffix(TargetName, "_maint_"),
     {ok, _} = net_kernel:start([ThisNode, shortnames]),
     process_args(Rest, Acc, nodename(TargetName));
 process_args([Arg | Rest], Acc, Opts) ->
@@ -73,7 +73,7 @@ nodename(Name) ->
 append_node_suffix(Name, Suffix) ->
     case string:tokens(Name, "@") of
         [Node, Host] ->
-            list_to_atom(lists:concat([Node, Suffix, "@", Host]));
+            list_to_atom(lists:concat([Node, Suffix, os:getpid(), "@", Host]));
         [Node] ->
-            list_to_atom(lists:concat([Node, Suffix]))
+            list_to_atom(lists:concat([Node, Suffix, os:getpid()]))
     end.
