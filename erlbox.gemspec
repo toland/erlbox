@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{erlbox}
-  s.version = "1.5.1"
+  s.version = "1.6.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Phillip Toland"]
-  s.date = %q{2009-07-23}
+  s.date = %q{2009-07-27}
   s.default_executable = %q{erlbox}
   s.description = %q{Rake tasks and helper scripts for building Erlang applications.}
   s.email = %q{phil.toland@gmail.com}
@@ -35,19 +35,21 @@ Gem::Specification.new do |s|
      "lib/erlbox/install.rb",
      "lib/erlbox/recurse.rb",
      "lib/erlbox/release.rb",
-     "lib/erlbox/snmp.rb",
-     "lib/erlbox/test.rb",
-     "lib/erlbox/utils.rb",
+     "lib/erlbox/reltools/erl.sh",
      "lib/erlbox/reltools/make-rel",
      "lib/erlbox/reltools/nodetool",
      "lib/erlbox/reltools/runner",
-     "lib/erlbox/reltools/erl.sh"
+     "lib/erlbox/reltools/runner.erb",
+     "lib/erlbox/snmp.rb",
+     "lib/erlbox/test.rb",
+     "lib/erlbox/utils.rb"
   ]
+  s.has_rdoc = false
   s.homepage = %q{http://github.com/toland/erlbox}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{erlbox}
-  s.rubygems_version = %q{1.3.4}
+  s.rubygems_version = %q{1.3.5}
   s.summary = %q{Erlang Toolbox}
 
   if s.respond_to? :specification_version then
