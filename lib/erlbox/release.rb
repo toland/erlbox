@@ -88,24 +88,6 @@ def build_node(nodefile)
   
 end
 
-def copy_runner(node_desc, reltools_dir)
-  ## Get the hash of config values for the runner from descriptor
-  runner_opts = node_desc.fetch('runner', {}); 
-                                  
-  runner_base_dir = runner_opts.fetch('base_dir', ".")
-  runner_etc_dir  = runner_opts.fetch('etc_dir', "$RUNNER_BASE_DIR/etc")
-  runner_log_dir  = runner_opts.fetch('log_dir', "$RUNNER_BASE_DIR/log")
-  runner_user     = runner_opts.fetch('user', "")
-
-  ## Load the template ERB and do the substitution
-  template = ERB.new(File.new(File.join(reltools_dir, "runner.erb")).read)
-  target = File.open(File.join(node_desc['release'], "bin", node_desc['release']), "w")
-  target.write(template.result(binding))
-
-  # Make sure the target is executable
-  target.chmod(0755)
-end
-
 
 def load_node_yaml(file)
   # Load the YAML file
