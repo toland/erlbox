@@ -40,7 +40,7 @@ Gem::Specification.new do |s|
      "lib/erlbox/utils.rb",
      "lib/erlbox/reltools/make-rel",
      "lib/erlbox/reltools/nodetool",
-     "lib/erlbox/reltools/runner.erb",
+     "lib/erlbox/reltools/runner",
      "lib/erlbox/reltools/erl.sh"
   ]
   s.homepage = %q{http://github.com/toland/erlbox}

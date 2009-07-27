@@ -83,7 +83,8 @@ def build_node(nodefile)
 
   # Make sure bin directory exists and copy the runner
   FileUtils.mkdir_p File.join(relname, "bin")
-  copy_runner(node_desc, reltools_dir)
+  cp File.join(reltools_dir, "runner"), File.join(relname, "bin", relname)
+  chmod 0755, File.join(relname, "bin", relname)
   
 end
 

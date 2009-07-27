@@ -1,6 +1,6 @@
 #!/bin/sh
 
-RUNNER_BASE_DIR=<%= runner_base_dir %>
+RUNNER_BASE_DIR=.
 
 # If the base directory is specified as current directory, resolve to 
 # fully qualified path
@@ -8,9 +8,9 @@ if [ "$RUNNER_BASE_DIR" == "." ]; then
     RUNNER_BASE_DIR=`pwd`
 fi
 
-RUNNER_ETC_DIR=<%= runner_etc_dir %>
-RUNNER_LOG_DIR=<%= runner_log_dir %>
-RUNNER_USER=<%= runner_user %>
+RUNNER_ETC_DIR=$RUNNER_BASE_DIR/etc
+RUNNER_LOG_DIR=$RUNNER_BASE_DIR/log
+RUNNER_USER=
 
 # Make sure this script is running as the appropriate user
 if [ ! -z "$RUNNER_USER"] && [ `whoami` != "$RUNNER_USER" ]; then
