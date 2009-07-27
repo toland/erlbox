@@ -13,7 +13,7 @@ RUNNER_LOG_DIR=$RUNNER_BASE_DIR/log
 RUNNER_USER=
 
 # Make sure this script is running as the appropriate user
-if [ ! -z "$RUNNER_USER"] && [ `whoami` != "$RUNNER_USER" ]; then
+if [ ! -z "$RUNNER_USER" ] && [ `whoami` != "$RUNNER_USER" ]; then
     exec sudo -u $RUNNER_USER -i $0 $@
 fi
 
