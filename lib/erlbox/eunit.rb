@@ -79,6 +79,7 @@ def run_eunit(dir, cover = false, rest = '')
   log_dir = abspath(EUNIT_LOG_DIR)
 
   cover_flags = cover ? "-cover -o #{log_dir}/coverage" : ''
+  verbose_flags = verbose? ? '-v' : ''
 
   suites = ENV['suites']
   all_suites = ''
@@ -87,7 +88,7 @@ def run_eunit(dir, cover = false, rest = '')
   script = __FILE__.sub('.rb', '')
 
   cmd = "cd #{EUNIT_WORK_DIR} &&\
-         #{script} -b #{abspath('./ebin')} -l #{log_dir}/eunit.log\
+         #{script} #{verbose_flags} -b #{abspath('./ebin')} -l #{log_dir}/eunit.log\
                    #{cover_flags} #{all_suites} #{abspath(dir)}"
 
   puts cmd.squeeze(' ') if verbose?
