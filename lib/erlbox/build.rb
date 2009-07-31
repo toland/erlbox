@@ -53,7 +53,7 @@ directory 'ebin'
 
 rule(%r(^ebin/.*\.beam$) => ["%{ebin,src}X.erl"]) do |t|
   puts "compiling #{t.source}..."
-  sh "erlc #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)} -o ebin #{t.source}"
+  sh "erlc #{print_flags(ERLC_FLAGS)} #{expand_path(ERL_PATH)} -o ebin #{t.source}", :verbose => verbose?
 end
 
 ## -------------------------------------------------------------------
