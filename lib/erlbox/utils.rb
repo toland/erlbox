@@ -232,8 +232,8 @@ def load_config()
   # Fix up default repo URL
   if config.has_key?('default_repo')
     url = URI(config['default_repo'])
-    if url.scheme == nil or url.scheme == "file":
-        config['defaut_repo'] = File.expand_path(url.path)
+    if url.scheme == nil || url.scheme == "file"
+      config['default_repo'] = File.expand_path(url.path)
     end
   end
 
@@ -266,8 +266,7 @@ def erl_install_app(appname)
     exit 1
   end
 
-  cd workdir
-  sh "rake install"
+  sh "cd #{workdir} && rake install"
 end
 
 ##
