@@ -70,13 +70,13 @@ def load_config()
   config
 end
 
-def download_app(appname, appurl)
+def download_app(appname, appurl, appvers)
   # Work directory will be /tmp/erlbox.<pid>
   tmpdir = "/tmp/erlbox_#{appname}.#{Process.pid}"
   
   # Clone the desired url using GIT
   # TODO: Support alternative systems
-  cmd = "git clone #{appurl} #{tmpdir}/"
+  cmd = "git clone -n #{appurl} #{tmpdir}/"
   puts cmd
   system cmd
   if $? != 0
@@ -86,6 +86,14 @@ def download_app(appname, appurl)
   # Handle git submodules
   if File.exist?("#{tmpdir}/.gitmodules")
     system "(cd #{tmpdir} && git submodule update --init)"
+  end
+
+  # Check out appropriate version of the repo
+  cmd = "(cd #{tmpdir} && git checkout #{appvers})"
+  puts cmd
+  system cmd
+  if $? != 0
+    exit 1
   end
 
   # Return the tmp directory path 
@@ -111,10 +119,22 @@ def install_deps(workdir, appname = nil, stack = [])
 end
 
 def install_app(appname, stack = [])
+  puts "Installing #{appname}"
   # Check for a dependency cycle
   if stack.include?(appname)
     puts "#{appname} already scheduled for installation"
     return
+  end
+
+  # Split app name on whitespace -- we pass the desired tag/branch in this way
+  if not appname.nil?
+    app_parts = appname.split(nil, 2)
+    if app_parts.length == 2
+      appname = app_parts[0]
+      appvers = app_parts[1]
+    else
+      appvers = "HEAD"
+    end
   end
 
   # Default workdir is current working directory -- examination of appname may 
@@ -135,12 +155,12 @@ def install_app(appname, stack = [])
       if File.directory?(appname_path)
         workdir = appname_path
       else
-        workdir = download_app(appname, File.join(CONFIG['default_repo'], appname))
+        workdir = download_app(appname, File.join(CONFIG['default_repo'], appname), appvers)
         is_temp = true
       end
     else
       # Appname is a proper URL -- we'll pass this to git
-      workdir = download_app(appname, appname)
+      workdir = download_app(appname, appname, appvers)
       is_temp = true
     end
   end
@@ -192,7 +212,11 @@ CONFIG = load_config()
 action = ARGV[0]
 case action
 when 'install'
-  install_app(ARGV[1])
+  if ARGV.length > 2
+    install_app(ARGV[1] + " " + ARGV[2])
+  else
+    install_app(ARGV[1])
+  end
 when 'cleanup'
   FileUtils.rm_rf Dir.glob("/tmp/erlbox_*")
 when 'ensure'
