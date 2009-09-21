@@ -88,10 +88,16 @@ def run_eunit(dir, cover = false, rest = '')
   script = __FILE__.sub('.rb', '')
 
   cmd = "cd #{EUNIT_WORK_DIR} &&\
-         #{script} #{verbose_flags} -b #{abspath('./ebin')} -l #{log_dir}/eunit.log\
+         #{script} #{verbose_flags} #{expand_erl_path()} \
+                   -b #{abspath('./ebin')} -l #{log_dir}/eunit.log\
                    #{cover_flags} #{all_suites} #{abspath(dir)}"
 
   puts cmd.squeeze(' ') if verbose?
 
   sh cmd
+end
+
+def expand_erl_path()
+  # Add the ERL_PATH includes using multiple -b arguments 
+  ERL_PATH.empty? ? '' : "-b #{ERL_PATH.join(' -b ')}"
 end
