@@ -6,6 +6,12 @@ title: Erlbox - The Erlang Toolbox
 
 This is a set of Rake tasks and scripts for working with Erlang projects.
 
+### GETTING STARTED
+
+Dave 'DizzyD' Smith has written a great article on [getting started with Erlbox][0].
+
+[0]: http://dizzyd.com/blog/post/122
+
 ### USAGE
 
 The erlbox Rake tasks assume a certain directory structure. The tasks may or may
