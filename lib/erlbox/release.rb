@@ -70,10 +70,16 @@ def build_node(nodefile)
 
   # Copy nodetool into erts-<vsn>/bin 
   FileUtils.cp(File.join(reltools_dir, "nodetool"), erts_bin)
+  chmod 0755, File.join(erts_bin, "nodetool")
+ 
+  # Make sure escript has execute permission
+  chmod 0755, File.join(erts_bin, "escript")
+
 
   # Copy our custom erl.sh and the necessary .boot file into erts-<vsn>/bin. This is necessary
   # to enable escript to work properly
   FileUtils.cp(File.join(reltools_dir, "erl.sh"), File.join(erts_bin, "erl"))
+  chmod 0755, File.join(erts_bin, "erl")
   FileUtils.cp(File.join(erl_root(), "bin", "start.boot"), File.join(erts_bin, "erl.boot"))
 
   # Create any requested empty-dirs
@@ -85,7 +91,8 @@ def build_node(nodefile)
   FileUtils.mkdir_p File.join(relname, "bin")
   cp File.join(reltools_dir, "runner"), File.join(relname, "bin", relname)
   chmod 0755, File.join(relname, "bin", relname)
-  
+
+   
 end
 
 
