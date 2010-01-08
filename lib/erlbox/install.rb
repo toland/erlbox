@@ -23,6 +23,14 @@
 ##
 ## -------------------------------------------------------------------
 
+task :install => [:'install:build', :'install:deps'] do
+  erl_install()
+end
+
+task :install_no_deps => [:'install:build'] do
+  erl_install()
+end
+
 namespace :install do
 
   task :appid, [:root_dir] do |t, args|
@@ -35,4 +43,8 @@ namespace :install do
   desc "Build the application for installation"
   task :build => [:compile]
 
+  desc "Installs all the dependencies for the current app"
+  task :deps do
+    erl_install_dependencies(APP_NAME)
+  end
 end
